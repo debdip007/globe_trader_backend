@@ -14,7 +14,7 @@ const customValidationResult = validationResult.withDefaults({
 const validate = (req, res, next) => {
   const errors = customValidationResult(req);
   if (!errors.isEmpty()) {
-    return res.status(400).json({ errors: errors.array() });
+    return res.status(401).json({ errors: errors.array() });
   }
   next();
 };

@@ -11,9 +11,9 @@ exports.generateOtp = async (req, res) => {
   try {
     const { email } = req.body;
     const otp = helper.commonHelpers.generateEmailOTP();
-    const timeDiff = 5;
+    const timeDiff = 90;
     const now = new Date();
-    now.setMinutes(now.getMinutes() + timeDiff);
+    now.setSeconds(now.getMinutes() + timeDiff);
     const timestamp = now.getTime();
 
     const checkUser = await User.findOne({
@@ -24,7 +24,7 @@ exports.generateOtp = async (req, res) => {
     console.log(checkUser);
 
     if(checkUser) {
-      return res.status(201).send({ success: 0, message: "User already exists with the email "+req.body.email });
+      return res.status(401).send({ success: 0, message: "User already exists with the email "+req.body.email });
     }
 
     const checkotp = await RegisterOTP.findOne({ where: { email: req.body.email } });
@@ -33,10 +33,10 @@ exports.generateOtp = async (req, res) => {
       // OTP exists, proceed to update
       
       const diffInMilliseconds = now.getTime() - checkotp.timestamp;
-      const diffInMinutes = diffInMilliseconds / (1000 * 60);
-      console.log(diffInMinutes);
-      if(diffInMinutes < timeDiff) {
-        return res.status(201).send({ success: 0, message: "OPT already sent. You can resend OTP after "+ (timeDiff - diffInMinutes).toFixed(2) +" minutes."}); 
+      const diffInSeconds = diffInMilliseconds / (1000);
+      console.log(diffInSeconds);
+      if(diffInSeconds < timeDiff) {
+        return res.status(401).send({ success: 0, message: "OTP already sent. You can resend OTP after "+ (timeDiff - diffInSeconds).toFixed(2) +" seconds."}); 
       }
       
       const [updateotp] = await RegisterOTP.update({
@@ -44,7 +44,7 @@ exports.generateOtp = async (req, res) => {
         timestamp : timestamp
       }, { where: { email: req.body.email } });   
       
-      return res.status(201).send({ success: 1, message: "OTP sent again to your email "+req.body.email });
+      return res.status(200).send({ success: 1, message: "An OTP has been successfully sent to your email." });
     } else {
       // OTP does not exist
       const generateotp = await RegisterOTP.create({       
@@ -55,7 +55,7 @@ exports.generateOtp = async (req, res) => {
         timestamp : timestamp
       });
 
-      return res.status(201).send({ success: 1, message: "OTP sent to your email "+req.body.email });
+      return res.status(200).send({ success: 1, message: "An OTP has been successfully sent to your email." });
     }
     
   } catch (error) {
@@ -77,7 +77,7 @@ exports.register = async (req, res) => {
     });
     
     if(checkUser) {
-      return res.status(201).send({ success: 0, message: "User already exists with the email "+req.body.email });
+      return res.status(401).send({ success: 0, message: "User already exists with the email "+req.body.email });
     }  
 
     if(checkotp) {
@@ -94,13 +94,13 @@ exports.register = async (req, res) => {
         platform_type
       });
 
-      res.status(201).send({ success: 1, message: "User registered successfully!" });
+      res.status(200).send({ success: 1, message: "User registered successfully!" });
     }else{
       const [updateotp] = await RegisterOTP.update({
         attempt
       }, { where: { email: req.body.email } });   
 
-      res.status(201).send({ success: 0, message: "OTP not matched, please try again." });
+      res.status(401).send({ success: 0, message: "OTP not matched, please try again." });
     }
     
   } catch (error) {
@@ -123,7 +123,7 @@ exports.login = async (req, res) => {
     });
 
     if (!user) {
-      return res.status(404).send({ 
+      return res.status(401).send({ 
         success: 0,
         message: "User Not found." 
       });
@@ -148,7 +148,7 @@ exports.login = async (req, res) => {
 
     res.status(200).send({
       success: 1, 
-      message: "User login  successfully!",
+      message: "User login successfully!",
       details : {
         id: user.id,
         fullname: user.fullname,
@@ -174,16 +174,49 @@ exports.login = async (req, res) => {
   }  
 };
 
-const checkExistingUser = (email) => {
+exports.refreshToken = async (req, res) => {
   try {
-    const user = User.findOne({
+    const user = await User.findOne({
       where: {
-        email: email
+        email: req.body.email
       }
     });
-    console.log(user);
-  } catch (error) {
-    console.error('Error checking user existence:', error);
-    throw error;
-  }  
+
+    if (!user) {
+      return res.status(401).send({ 
+        success: 0,
+        message: "User Not found." 
+      });
+    }
+
+    const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, {
+      expiresIn: 3600 // 1 hours
+    });
+
+    res.status(200).send({
+      success: 1, 
+      message: "Token updated successfully!",
+      details : {
+        id: user.id,
+        fullname: user.fullname,
+        email: user.email,      
+        phone: user.phone,
+        status: user.status,
+        user_type: user.user_type,
+        is_verified: user.is_verified,
+        country: user.country,
+        country_code: user.country_code,
+        platform_type: user.platform_type,
+        profile_image: user.profile_image,
+        created_at: user.createdAt,
+        updated_at: user.updatedAt,
+        accessToken: token
+      }      
+    });
+  } catch (err) {
+    res.status(500).send({ 
+      success: 0, 
+      message: err.message 
+    });
+  }
 };

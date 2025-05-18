@@ -8,6 +8,8 @@ const validate = require('../middlewares/validate');
 router.post("/generate-otp", otpValidationRules, validate, authController.generateOtp);
 router.post("/register", registerValidationRules, validate, authController.register);
 router.post("/login", loginValidationRules, validate, authController.login);
+router.post("/get-token", authController.refreshToken);
+
 router.get("/profile", verifyToken, (req, res) => {
   res.status(200).send("User Profile");
 });
