@@ -85,8 +85,8 @@ exports.register = async (req, res) => {
         fullname, 
         email,      
         password: bcrypt.hashSync(password, 8),
-        country: JSON.stringify(country), 
-        country_code: JSON.stringify(country_code), 
+        country: country, //JSON.stringify(country) 
+        country_code: country_code, //JSON.stringify(country_code), 
         phone,
         status: status,
         user_type,
