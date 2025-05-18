@@ -70,7 +70,7 @@ exports.register = async (req, res) => {
     
     const checkotp = await RegisterOTP.findOne({ where: { email: email, otp: otp } });
 
-    const checkUser = User.findOne({
+    const checkUser = await User.findOne({
       where: {
         email: req.body.email
       }
