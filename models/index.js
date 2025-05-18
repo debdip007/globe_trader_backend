@@ -41,5 +41,6 @@ db.sequelize = sequelize;
 db.Sequelize = Sequelize;
 
 db.user = require("./user")(sequelize, Sequelize);
+db.registerotp = require("./registerotp")(sequelize, Sequelize);
 
 module.exports = db;
