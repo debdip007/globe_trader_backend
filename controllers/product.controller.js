@@ -28,7 +28,14 @@ exports.getProducts = async (req, res) => {
                 success: 0,
                 message: "No Products found." 
             });
-        }else{            
+        }else{  
+            products.forEach(product => {
+                product.country = JSON.parse(product.country);
+                product.category = JSON.parse(product.category);
+                product.sub_category = JSON.parse(product.sub_category);
+                product.additional_image = [];
+            }); 
+
             res.status(200).send({
                 success: 1, 
                 message: "Product list found.",
@@ -113,40 +120,3 @@ exports.createProduct = async (req, res) => {
   }  
 };
 
-
-const uploadBase64Image = (imageBase64) => {
-
-  // Validate the base64 string
-  if (!imageBase64 || typeof imageBase64 !== 'string') {
-    return res.status(400).json({ error: 'Invalid image data' });
-  }
-
-  // Extract the image format and base64 data
-  const matches = imageBase64.match(/^data:image\/([a-zA-Z]+);base64,(.+)$/);
-  if (!matches || matches.length !== 3) {
-    return res.status(400).json({ error: 'Invalid base64 format' });
-  }
-
-  const imageType = matches[1];
-  const imageData = matches[2];
-  const buffer = Buffer.from(imageData, 'base64');
-
-  // Generate a unique filename
-  const filename = `image_${Date.now()}.${imageType}`;
-  const filePath = path.join(__basedir, 'media/uploads', filename);
-
-  // Ensure the uploads directory exists  
-  fs.mkdirSync(path.join(__basedir, 'media/uploads'), { recursive: true });
-
-  // Save the image file
-  fs.writeFile(filePath, buffer, (err) => {
-    if (err) {
-      console.error('Error saving image:', err);
-      return false;
-      // return res.status(500).json({ error: 'Failed to save image' });
-    }
-    console.log("From image upload function "+filePath);
-    return filePath;
-    // res.status(200).json({ message: 'Image uploaded successfully', filename });
-  });
-};
