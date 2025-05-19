@@ -1,7 +1,5 @@
 const db = require("../models/index.js");
 const Categories = db.category;
-const bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken");
 require("dotenv").config();
 
 exports.getCategory = async (req, res) => {
@@ -12,7 +10,7 @@ exports.getCategory = async (req, res) => {
         }
     });
 
-    if (!category) {
+    if (!category || category.length === 0) {
       return res.status(401).send({ 
         success: 0,
         message: "No category found." 

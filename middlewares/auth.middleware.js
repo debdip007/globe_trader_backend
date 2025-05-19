@@ -4,12 +4,12 @@ require("dotenv").config();
 const verifyToken = (req, res, next) => {
   const token = req.headers["x-access-token"] || req.headers["authorization"];
   if (!token) {
-    return res.status(401).send({ message: "No token provided!" });
+    return res.status(401).send({ success: 0, message: "No token provided!" });
   }
 
   jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
     if (err) {
-      return res.status(401).send({ message: "Unauthorized!" });
+      return res.status(401).send({ success: 0, message: "Unauthorized!" });
     }
     req.userId = decoded.id;
     next();

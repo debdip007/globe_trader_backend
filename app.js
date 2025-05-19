@@ -3,6 +3,8 @@ const cors = require("cors");
 const app = express();
 require("dotenv").config();
 
+global.__basedir = __dirname;
+
 const db = require("./models/index.js");
 
 app.use(cors());
@@ -10,10 +12,12 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 const authRoutes = require("./routes/auth.routes");
+const userRoutes = require("./routes/user.routes");
 const commonRoutes = require("./routes/common.routes");
 
 app.get('/', (req, res) => res.send('Welcome to GlobeTrader API server'));
 app.use("/api/auth", authRoutes);
+app.use("/api/user", userRoutes);
 app.use("/api/common", commonRoutes);
 
 // db.sequelize.sync({force:true}).then(() => { // to update the existing table with new column changes 
