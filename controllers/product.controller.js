@@ -56,7 +56,14 @@ exports.getProducts = async (req, res) => {
                 success: 0,
                 message: "No Products found." 
             });
-        }else{            
+        }else{       
+            products.forEach(product => {
+                product.country = JSON.parse(product.country);
+                product.category = JSON.parse(product.category);
+                product.sub_category = JSON.parse(product.sub_category);
+                product.additional_image = [];
+            }); 
+                 
             res.status(200).send({
                 success: 1, 
                 message: "Product details found.",
