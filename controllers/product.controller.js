@@ -56,14 +56,13 @@ exports.getProducts = async (req, res) => {
                 success: 0,
                 message: "No Products found." 
             });
-        }else{       
-            products.forEach(product => {
-                product.country = JSON.parse(product.country);
-                product.category = JSON.parse(product.category);
-                product.sub_category = JSON.parse(product.sub_category);
-                product.additional_image = [];
-            }); 
-                 
+        }else{
+            products.country = JSON.parse(products.country);
+            products.category = JSON.parse(products.category);
+            products.sub_category = JSON.parse(products.sub_category);
+            products.main_image = req.protocol  + '://' + req.get('host') + '/' +products.main_image;
+            products.additional_image = [];
+
             res.status(200).send({
                 success: 1, 
                 message: "Product details found.",
