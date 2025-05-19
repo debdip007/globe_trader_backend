@@ -9,9 +9,11 @@ require("dotenv").config();
 exports.getProducts = async (req, res) => {
   try {
     const productId = req.params.id;
-    const page = req.body.page == "" ? 1 : req.body.page;
-    const pageSize = req.body.page_size == "" ? 20 : req.body.page_size;
-    const sellerId = req.body.seller_id == "" ? 20 : req.body.seller_id;
+    if(req.body !== undefined) {
+        const page = req.body.page == "" ? 1 : req.body.page;
+        const pageSize = req.body.page_size == "" ? 20 : req.body.page_size;
+        const sellerId = req.body.seller_id == "" ? 1 : req.body.seller_id;    
+    }
 
     if(productId == null || productId == "") {
         const products = await Products.findAll({
