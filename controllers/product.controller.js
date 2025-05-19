@@ -60,7 +60,7 @@ exports.getProducts = async (req, res) => {
             products.country = JSON.parse(products.country);
             products.category = JSON.parse(products.category);
             products.sub_category = JSON.parse(products.sub_category);
-            products.main_image = req.protocol  + '://' + req.get('host') + '/' +products.main_image;
+            products.main_image = req.protocol  + '://' + req.get('host') + '/images/' +products.main_image;
             products.additional_image = [];
 
             res.status(200).send({

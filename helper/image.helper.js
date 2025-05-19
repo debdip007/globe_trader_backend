@@ -29,7 +29,7 @@ function saveBase64Image(base64Data, folderPath = 'media/uploads') {
   // Write the image to disk
   fs.writeFileSync(filePath, imageData, { encoding: 'base64' });
 
-  return filePath;
+  return fileName;
 }
 
 module.exports = { saveBase64Image };

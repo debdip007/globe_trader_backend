@@ -1,7 +1,10 @@
 const express = require("express");
 const cors = require("cors");
+const path = require('path');
+
 const app = express();
 require("dotenv").config();
+
 
 global.__basedir = __dirname;
 
@@ -16,6 +19,8 @@ const userRoutes = require("./routes/user.routes");
 const commonRoutes = require("./routes/common.routes");
 
 app.get('/', (req, res) => res.send('Welcome to GlobeTrader API server'));
+app.use('/images', express.static(path.join(__dirname, 'media', 'uploads')));
+
 app.use("/api/auth", authRoutes);
 app.use("/api/user", userRoutes);
 app.use("/api/common", commonRoutes);
