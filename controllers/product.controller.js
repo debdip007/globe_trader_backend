@@ -80,8 +80,10 @@ exports.getProducts = async (req, res) => {
 
 exports.createProduct = async (req, res) => {
   try {
+    const device_type = req.headers["device_type"];
+
     let category_string = sub_category_string = country_string = "";     
-    const { product_name, sku, main_image, product_unit, minimum_order_qty, product_capacity, country, product_description, status, include, seller_id, device_type, category, sub_category } = req.body;
+    const { product_name, sku, main_image, product_capacity, country, product_description, status, include, seller_id, category, sub_category, product_quantity, product_unit, minimum_order_qty, minimum_order_qty_unit } = req.body;
     
     const savedPath = saveBase64Image(main_image);
 
@@ -100,8 +102,6 @@ exports.createProduct = async (req, res) => {
         product_name,
         sku,
         main_image:savedPath,
-        product_unit,
-        minimum_order_qty,
         product_capacity,
         country : country_string,
         product_description,
@@ -110,7 +110,11 @@ exports.createProduct = async (req, res) => {
         status,
         include,
         seller_id,
-        device_type
+        device_type:device_type,
+        product_quantity,
+        product_unit,
+        minimum_order_qty,
+        minimum_order_qty_unit
     });
 
     res.status(200).send({

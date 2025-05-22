@@ -27,7 +27,9 @@ module.exports = (sequelize, DataTypes) => {
     status: DataTypes.INTEGER,
     include: DataTypes.INTEGER,
     seller_id: DataTypes.INTEGER,
-    device_type: DataTypes.STRING
+    device_type: DataTypes.STRING,
+    minimum_order_qty_unit: DataTypes.TEXT,
+    product_quantity: DataTypes.TEXT
   }, {
     sequelize,
     modelName: 'Product',
