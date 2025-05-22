@@ -8,13 +8,23 @@ require("dotenv").config();
 
 exports.getProducts = async (req, res) => {
   try {
-    let sellerId = page = pageSize = ""; 
+    let sellerId = buyerId = page = pageSize = ""; 
     const productId = req.params.id;
+
+    const where = {
+      brand_archived_status: archived_status
+    };
+
+    // Conditionally add manufacturer_id to the where clause
+    if (manufacturer_id != null) {
+      where.ManufacturerId = manufacturer_id;
+    }
     
     if(req.body !== undefined) {
         page = req.body.page == "" ? 1 : req.body.page;
         pageSize = req.body.page_size == "" ? 20 : req.body.page_size;
         sellerId = req.body.seller_id == "" ? 1 : req.body.seller_id;    
+        buyerId = req.body.buyer_id == "" ? 1 : req.body.buyer_id;    
     }
 
     if(productId == null || productId == "") {
