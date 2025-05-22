@@ -10,15 +10,6 @@ exports.getProducts = async (req, res) => {
   try {
     let sellerId = buyerId = page = pageSize = ""; 
     const productId = req.params.id;
-
-    const where = {
-      brand_archived_status: archived_status
-    };
-
-    // Conditionally add manufacturer_id to the where clause
-    if (manufacturer_id != null) {
-      where.ManufacturerId = manufacturer_id;
-    }
     
     if(req.body !== undefined) {
         page = req.body.page == "" ? 1 : req.body.page;
@@ -26,6 +17,7 @@ exports.getProducts = async (req, res) => {
         sellerId = req.body.seller_id == "" ? 1 : req.body.seller_id;    
         buyerId = req.body.buyer_id == "" ? 1 : req.body.buyer_id;    
     }
+    sellerId = req.userId;
 
     if(productId == null || productId == "") {
         const products = await Products.findAll({
@@ -92,11 +84,15 @@ exports.getProducts = async (req, res) => {
 
 exports.createProduct = async (req, res) => {
   try {
+    let sellerId = "";
+    sellerId = req.userId;
+
     const device_type = req.headers["device_type"];
 
     let category_string = sub_category_string = country_string = "";     
-    const { product_name, sku, main_image, product_capacity, country, product_description, status, include, seller_id, category, sub_category, product_quantity, product_unit, minimum_order_qty, minimum_order_qty_unit } = req.body;
+    const { product_name, sku, main_image, product_capacity, country, product_description, status, include, category, sub_category, product_quantity, product_unit, minimum_order_qty, minimum_order_qty_unit } = req.body;
     
+
     const savedPath = saveBase64Image(main_image);
 
     if(category != "") {
@@ -121,7 +117,7 @@ exports.createProduct = async (req, res) => {
         sub_category: sub_category_string,
         status,
         include,
-        seller_id,
+        sellerId,
         device_type:device_type,
         product_quantity,
         product_unit,

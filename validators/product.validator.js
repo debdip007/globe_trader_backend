@@ -12,10 +12,7 @@ const createProductValidator = [
     .withMessage('Product main image is required.'),
   body('category')
     .notEmpty()
-    .withMessage('Category is required.'),
-  body('seller_id')
-    .notEmpty()
-    .withMessage('Seller ID is required.'),
+    .withMessage('Category is required.')
 ];
 
 module.exports = {
