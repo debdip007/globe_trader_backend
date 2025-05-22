@@ -1,5 +1,10 @@
 const fs = require('fs');
 const path = require('path');
+const { promisify } = require('util');
+const fileType = require('file-type');
+
+const writeFile = promisify(fs.writeFile);
+
 
 /**
  * Saves a base64 encoded image to disk.
@@ -8,7 +13,7 @@ const path = require('path');
  * @returns {string} - The relative path to the saved image.
  */
 
-function saveBase64Image(base64Data, folderPath = 'media/uploads') {
+/*function saveBase64Image(base64Data, folderPath = 'media/uploads') {
   // Ensure the folder exists
   if (!fs.existsSync(folderPath)) {
     fs.mkdirSync(folderPath, { recursive: true });
@@ -30,6 +35,37 @@ function saveBase64Image(base64Data, folderPath = 'media/uploads') {
   fs.writeFileSync(filePath, imageData, { encoding: 'base64' });
 
   return fileName;
+}*/
+
+
+async function saveBase64Image(base64String, outputFolder = './media/uploads') {
+  
+  // Clean up: remove any whitespace or newlines
+  const cleanBase64 = base64String.replace(/\s+/g, '');
+
+  // Decode base64
+  const buffer = Buffer.from(cleanBase64, 'base64');
+
+  // Detect the file type
+  const type = await fileType.fromBuffer(buffer);
+  if (!type) {
+    throw new Error('Unable to determine file type');
+  }
+
+  // Ensure the output directory exists
+  if (!fs.existsSync(outputFolder)) {
+    fs.mkdirSync(outputFolder, { recursive: true });
+  }
+
+  // Generate file path
+  const filename = `product_image-${Date.now()}.${type.ext}`;
+  const filepath = path.join(outputFolder, filename);
+
+  // Write to file
+  await writeFile(filepath, buffer);
+  console.log(`Saved file to ${filepath}`);
+  return filename;
 }
+
 
 module.exports = { saveBase64Image };

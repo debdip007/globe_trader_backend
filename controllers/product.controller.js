@@ -8,25 +8,24 @@ require("dotenv").config();
 
 exports.getProducts = async (req, res) => {
   try {
-    let sellerId = buyerId = page = pageSize = ""; 
+    let userType = page = pageSize = ""; 
     const productId = req.params.id;
     
     if(req.body !== undefined) {
         page = req.body.page == "" ? 1 : req.body.page;
         pageSize = req.body.page_size == "" ? 20 : req.body.page_size;
-        sellerId = req.body.seller_id == "" ? 1 : req.body.seller_id;    
-        buyerId = req.body.buyer_id == "" ? 1 : req.body.buyer_id;    
+        userType = req.body.seller_id == "" ? 1 : req.body.user_type;    
     }
     sellerId = req.userId;
 
     if(productId == null || productId == "") {
         const products = await Products.findAll({
             where: {
-                status: 1,
+                // status: 1,
                 seller_id: sellerId 
             },
             limit: pageSize,
-            offset: (page - 1) * pageSize            
+            offset: (page - 1) * pageSize          
         });
 
         if (!products || products.length === 0) {
@@ -35,17 +34,23 @@ exports.getProducts = async (req, res) => {
                 message: "No Products found." 
             });
         }else{  
-            products.forEach(product => {
-                product.country = JSON.parse(product.country);
-                product.category = JSON.parse(product.category);
-                product.sub_category = JSON.parse(product.sub_category);
-                product.additional_image = [];
+            const modifiedProductObj = products.map(item => {
+              const obj = item.toJSON(); // <-- Important!
+              obj.country = JSON.parse(obj.country);
+              obj.category = JSON.parse(obj.category);
+              obj.sub_category = JSON.parse(obj.sub_category);
+              obj.main_image = req.protocol  + '://' + req.get('host') + '/images/' +obj.main_image;
+              obj.additional_image = [];
+              return obj;
             }); 
+
+            // console.log(modifiedProductObj);
+            // return false;
 
             res.status(200).send({
                 success: 1, 
                 message: "Product list found.",
-                products      
+                products: modifiedProductObj     
             });
         }
     }else{
@@ -61,16 +66,17 @@ exports.getProducts = async (req, res) => {
                 message: "No Products found." 
             });
         }else{
-            products.country = JSON.parse(products.country);
-            products.category = JSON.parse(products.category);
-            products.sub_category = JSON.parse(products.sub_category);
-            products.main_image = req.protocol  + '://' + req.get('host') + '/images/' +products.main_image;
-            products.additional_image = [];
+            const productObj = products.toJSON();
+            productObj.country = JSON.parse(productObj.country);
+            productObj.category = JSON.parse(productObj.category);
+            productObj.sub_category = JSON.parse(productObj.sub_category);
+            productObj.main_image = req.protocol  + '://' + req.get('host') + '/images/' +productObj.main_image;
+            productObj.additional_image = [];
 
             res.status(200).send({
                 success: 1, 
                 message: "Product details found.",
-                products      
+                products: productObj      
             });
         }
     }
@@ -84,7 +90,7 @@ exports.getProducts = async (req, res) => {
 
 exports.createProduct = async (req, res) => {
   try {
-    let sellerId = "";
+    let sellerId = savedPath = "";
     sellerId = req.userId;
 
     const device_type = req.headers["device_type"];
@@ -92,8 +98,11 @@ exports.createProduct = async (req, res) => {
     let category_string = sub_category_string = country_string = "";     
     const { product_name, sku, main_image, product_capacity, country, product_description, status, include, category, sub_category, product_quantity, product_unit, minimum_order_qty, minimum_order_qty_unit } = req.body;
     
-
-    const savedPath = saveBase64Image(main_image);
+    if(main_image != "") {
+      savedPath = await saveBase64Image(main_image);
+    }else{
+      res.status(401).send({ success: 0, message: "Product Main Image is missing"});
+    }
 
     if(category != "") {
         category_string = JSON.stringify(category);
@@ -130,12 +139,14 @@ exports.createProduct = async (req, res) => {
       message: "Product created successfully!",         
     });
   } catch (error) {
+    console.log(error);
+    return false;
     if (error.name === 'SequelizeUniqueConstraintError') {
       res.status(500).send({ success: 0, message: "Product with same SKU already exists." });
       console.error('Product with same SKU already exists.');
     } else {
       res.status(500).send({ success: 0, message: 'Error inserting new product:', error });
-      console.error('Error inserting new user:', error);
+      console.error('Error inserting new product:', error);
     }
   }  
 };
