@@ -97,6 +97,8 @@ exports.createProduct = async (req, res) => {
 
     let category_string = sub_category_string = country_string = "";     
     const { product_name, sku, main_image, product_capacity, country, product_description, status, include, category, sub_category, product_quantity, product_unit, minimum_order_qty, minimum_order_qty_unit } = req.body;
+    console.log(req.body);
+    return false;
     
     if(main_image != "") {
       savedPath = await saveBase64Image(main_image);
