@@ -6,7 +6,8 @@ exports.getCategory = async (req, res) => {
   try {
     const category = await Categories.findAll({
         where: {
-            parent_id: null
+            parent_id: null,
+            status: 1
         }
     });
 
@@ -36,7 +37,8 @@ exports.getSubCategory = async (req, res) => {
     
     const category = await Categories.findAll({
         where: {
-            parent_id: categoryId
+            parent_id: categoryId,
+            status: 1
         }
     });
 

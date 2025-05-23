@@ -1,52 +1,81 @@
 const db = require("../models/index.js");
 const helper = require("../helper/index.js");
+const { Op } = require('sequelize');
 const { saveBase64Image } = require('../helper/image.helper.js');
-const fs = require("fs");
-const path = require("path");
 const Products = db.product;
+const Categories = db.category;
+const AdditionalImage = db.additionalImage;
+const User = db.user;
 require("dotenv").config();
+
 
 exports.getProducts = async (req, res) => {
   try {
     let userType = page = pageSize = ""; 
+    let returnObj = {};
     const productId = req.params.id;
     
     if(req.body !== undefined) {
-        page = req.body.page == "" ? 1 : req.body.page;
+        page = req.body.page == "" ? 0 : req.body.page;
         pageSize = req.body.page_size == "" ? 20 : req.body.page_size;
-        userType = req.body.seller_id == "" ? 1 : req.body.user_type;    
+        userType = req.body.user_type == "" ? "SELLER" : req.body.user_type;    
+        trending = req.body.trending == "" ? false : req.body.trending;    
     }
     sellerId = req.userId;
 
+    const queryOptions = {      
+      order: [['id', 'DESC']],
+    };
+
+    if (userType == "SELLER") {
+      queryOptions.where = {seller_id: sellerId};
+    }else if(userType == "BUYER") {
+      queryOptions.where = {status: 1};
+    }
+
+    if(trending == false) {
+      queryOptions.limit = pageSize;
+      queryOptions.offset = (page) * pageSize;
+    }
+
     if(productId == null || productId == "") {
-        const products = await Products.findAll({
-            where: {
-                // status: 1,
-                seller_id: sellerId 
-            },
-            limit: pageSize,
-            offset: (page - 1) * pageSize          
-        });
+        const products = await Products.findAll(
+            queryOptions         
+        );
 
         if (!products || products.length === 0) {
             return res.status(401).send({ 
                 success: 0,
                 message: "No Products found." 
             });
-        }else{  
-            const modifiedProductObj = products.map(item => {
-              const obj = item.toJSON(); // <-- Important!
-              obj.country = JSON.parse(obj.country);
-              obj.category = JSON.parse(obj.category);
-              obj.sub_category = JSON.parse(obj.sub_category);
-              obj.main_image = req.protocol  + '://' + req.get('host') + '/images/' +obj.main_image;
-              obj.additional_image = [];
-              return obj;
-            }); 
+        }else{ 
+          
+            const modifiedProductObj = await Promise.all(
+              products.map(async (product) => {
+                const obj = product.toJSON(); // <-- Important!
 
-            // console.log(modifiedProductObj);
-            // return false;
+                const categoryName = await getCategoryName(obj.category);
+                const subCategoryName = await getCategoryName(obj.sub_category);
+                const seller = await getUserDetails(obj.seller_id);
+                const additionalImage = await getAdditionalImage(obj.id);
 
+                
+                obj.country = JSON.parse(obj.country);
+                obj.main_image = req.protocol  + '://' + req.get('host') + '/images/' +obj.main_image;
+                obj.category_name = categoryName;
+                obj.subCategory_name = subCategoryName;
+                obj.additional_image = additionalImage;
+                
+                if(userType == "BUYER") {
+                  obj.seller = seller;
+                }
+
+                return {
+                  ...obj                                  
+                };
+              })
+            );
+            
             res.status(200).send({
                 success: 1, 
                 message: "Product list found.",
@@ -54,6 +83,7 @@ exports.getProducts = async (req, res) => {
             });
         }
     }else{
+        // For Single product details
         const products = await Products.findOne({
             where: {
                 id: productId
@@ -67,11 +97,26 @@ exports.getProducts = async (req, res) => {
             });
         }else{
             const productObj = products.toJSON();
+
+            const categoryName = await getCategoryName(productObj.category);
+            const subCategoryName = await getCategoryName(productObj.sub_category);
+            const seller = await getUserDetails(productObj.seller_id);
+            const additionalImage = await getAdditionalImage(productObj.id);
+            
+
             productObj.country = JSON.parse(productObj.country);
             productObj.category = JSON.parse(productObj.category);
             productObj.sub_category = JSON.parse(productObj.sub_category);
             productObj.main_image = req.protocol  + '://' + req.get('host') + '/images/' +productObj.main_image;
             productObj.additional_image = [];
+            
+            productObj.category_name = categoryName;
+            productObj.subCategory_name = subCategoryName;
+            productObj.additional_image = additionalImage;
+            
+            if(userType == "BUYER") {
+              productObj.seller = seller;
+            }
 
             res.status(200).send({
                 success: 1, 
@@ -80,7 +125,8 @@ exports.getProducts = async (req, res) => {
             });
         }
     }
-  } catch (err) {    
+  } catch (err) { 
+    console.log(err);   
     res.status(500).send({ 
       success: 0, 
       message: err.message 
@@ -139,8 +185,6 @@ exports.createProduct = async (req, res) => {
       message: "Product created successfully!",         
     });
   } catch (error) {
-    console.log(error);
-    return false;
     if (error.name === 'SequelizeUniqueConstraintError') {
       res.status(500).send({ success: 0, message: "Product with same SKU already exists." });
       console.error('Product with same SKU already exists.');
@@ -151,3 +195,46 @@ exports.createProduct = async (req, res) => {
   }  
 };
 
+
+async function getCategoryName (categoryIdArray) {
+  try {
+    let modifiedCategoryObj = [];
+    const category = await Categories.findAll({
+        attributes: ['name'],
+        where: {
+          id: {
+            [Op.in]: JSON.parse(categoryIdArray)
+          }    
+        }
+    });
+    category.forEach((item) => {
+      modifiedCategoryObj.push(item.name);
+    });
+    return modifiedCategoryObj;
+  } catch (error) {
+    console.error('Error getting catagory name:', error);
+  }  
+  
+}
+
+async function getUserDetails (userId) {
+  try {    
+    const user = await User.findByPk(userId);
+    return user;
+  } catch (error) {
+    console.error('Error getting user details:', error);
+  }    
+}
+
+async function getAdditionalImage (productId) {
+  try {    
+    const additional_image = await AdditionalImage.findAll({
+      where : {
+        "product_id" : productId
+      }
+    });
+    return additional_image;
+  } catch (error) {
+    console.error('Error getting user details:', error);
+  }    
+}
