@@ -1,7 +1,8 @@
 const db = require("../models/index.js");
 const helper = require("../helper/index.js");
 const { Op } = require('sequelize');
-const { saveBase64Image } = require('../helper/image.helper.js');
+const { saveBase64Image, removeImage } = require('../helper/image.helper.js');
+const { getCategoryName } = require('../helper/profile.helper.js');
 const Products = db.product;
 const Categories = db.category;
 const AdditionalImage = db.additionalImage;
@@ -59,7 +60,6 @@ exports.getProducts = async (req, res) => {
                 const seller = await getUserDetails(obj.seller_id);
                 const additionalImage = await getAdditionalImage(obj.id);
 
-                
                 obj.country = JSON.parse(obj.country);
                 obj.main_image = req.protocol  + '://' + req.get('host') + '/images/' +obj.main_image;
                 obj.category_name = categoryName;
@@ -103,7 +103,6 @@ exports.getProducts = async (req, res) => {
             const seller = await getUserDetails(productObj.seller_id);
             const additionalImage = await getAdditionalImage(productObj.id);
             
-
             productObj.country = JSON.parse(productObj.country);
             productObj.category = JSON.parse(productObj.category);
             productObj.sub_category = JSON.parse(productObj.sub_category);
@@ -114,7 +113,7 @@ exports.getProducts = async (req, res) => {
             productObj.subCategory_name = subCategoryName;
             productObj.additional_image = additionalImage;
             
-            if(userType == "BUYER") {
+            if(userType == __buyerType) {
               productObj.seller = seller;
             }
 
@@ -195,8 +194,70 @@ exports.createProduct = async (req, res) => {
   }  
 };
 
+exports.addAdditionalImage = async (req, res) => {
+  try {
+    let sellerId = savedPath = "";
+    sellerId = req.userId;
 
-async function getCategoryName (categoryIdArray) {
+    const device_type = req.headers["device_type"];  
+    const { product_id, status, sort_order, image } = req.body;
+    
+    if(image != "") {
+      savedPath = await saveBase64Image(image);
+    }else{
+      res.status(401).send({ success: 0, message: "Image is missing"});
+    }
+    
+    const productAdditionalImageCreate = await AdditionalImage.create({       
+        image : savedPath,
+        product_id,
+        status,
+        sort_order
+    });
+
+    res.status(200).send({
+      success: 1, 
+      message: "Product additional image added successfully!",         
+    });
+  } catch (error) {
+    res.status(500).send({ success: 0, message: 'Error inserting new additional image:', error });
+    console.error('Error inserting new additional image:', error);
+  }  
+};
+
+
+exports.removeAdditionalImage = async (req, res) => {
+  try {
+    let sellerId = savedPath = "";
+    sellerId = req.userId;
+
+    const device_type = req.headers["device_type"];  
+    const id = req.params.id;
+
+    const additional_image = await AdditionalImage.findByPk(id);
+    
+    if(additional_image) {
+      await removeImage(additional_image.image);
+      
+      const deletedAdditionalImage = await AdditionalImage.destroy({
+        where: { id: id }
+      });
+
+      res.status(200).send({
+        success: 1, 
+        message: "Product additional image deleted successfully!",         
+      });
+      
+    }else{
+      res.status(401).send({ success: 0, message: "Image is missing"});
+    }
+  } catch (error) {
+    res.status(500).send({ success: 0, message: 'Error deleting additional image:', error });
+    console.error('Error deleting additional image:', error);
+  }  
+};
+
+/*async function getCategoryName (categoryIdArray) {
   try {
     let modifiedCategoryObj = [];
     const category = await Categories.findAll({
@@ -215,7 +276,7 @@ async function getCategoryName (categoryIdArray) {
     console.error('Error getting catagory name:', error);
   }  
   
-}
+}*/
 
 async function getUserDetails (userId) {
   try {    
@@ -230,11 +291,12 @@ async function getAdditionalImage (productId) {
   try {    
     const additional_image = await AdditionalImage.findAll({
       where : {
-        "product_id" : productId
+        "product_id" : productId,
+        "status" : 1
       }
     });
     return additional_image;
   } catch (error) {
-    console.error('Error getting user details:', error);
+    console.error('Error getting additional image details:', error);
   }    
 }

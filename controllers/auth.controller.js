@@ -5,6 +5,7 @@ const RegisterOTP = db.registerotp;
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 require("dotenv").config();
+const { getProfileDetails } = require('../helper/profile.helper.js');
 
 
 exports.generateOtp = async (req, res) => {
@@ -80,6 +81,8 @@ exports.register = async (req, res) => {
       return res.status(401).send({ success: 0, message: "User already exists with the email "+req.body.email });
     }  
 
+    let statusCode = status == "" || status == null ? 1 : status;
+
     if(checkotp) {
       const user = await User.create({
         fullname, 
@@ -88,7 +91,7 @@ exports.register = async (req, res) => {
         country: country, //JSON.stringify(country) 
         country_code: country_code, //JSON.stringify(country_code), 
         phone,
-        status: status,
+        status: statusCode,
         user_type,
         is_verified: 1,
         platform_type
@@ -116,6 +119,8 @@ exports.register = async (req, res) => {
 
 exports.login = async (req, res) => {
   try {
+    let profile_details = {};
+
     const user = await User.findOne({
       where: {
         email: req.body.email
@@ -146,6 +151,8 @@ exports.login = async (req, res) => {
       expiresIn: 3600 // 1 hours
     });
 
+    profile_details = await getProfileDetails(user.id, user.user_type);
+
     res.status(200).send({
       success: 1, 
       message: "User login successfully!",
@@ -163,7 +170,8 @@ exports.login = async (req, res) => {
         profile_image: user.profile_image,
         created_at: user.createdAt,
         updated_at: user.updatedAt,
-        accessToken: token
+        accessToken: token,
+        profile_details : profile_details
       }      
     });
   } catch (err) {
@@ -176,6 +184,8 @@ exports.login = async (req, res) => {
 
 exports.refreshToken = async (req, res) => {
   try {
+    let profile_details = {};
+
     const user = await User.findOne({
       where: {
         email: req.body.email
@@ -192,6 +202,8 @@ exports.refreshToken = async (req, res) => {
     const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, {
       expiresIn: 3600 // 1 hours
     });
+
+    profile_details = await getProfileDetails(user.id, user.user_type);
 
     res.status(200).send({
       success: 1, 
@@ -210,7 +222,8 @@ exports.refreshToken = async (req, res) => {
         profile_image: user.profile_image,
         created_at: user.createdAt,
         updated_at: user.updatedAt,
-        accessToken: token
+        accessToken: token,
+        profile_details : profile_details
       }      
     });
   } catch (err) {

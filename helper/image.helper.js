@@ -2,6 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const { promisify } = require('util');
 const fileType = require('file-type');
+const sharp = require('sharp');
 
 const writeFile = promisify(fs.writeFile);
 
@@ -46,8 +47,14 @@ async function saveBase64Image(base64String, outputFolder = './media/uploads') {
   // Decode base64
   const buffer = Buffer.from(cleanBase64, 'base64');
 
+  // Compress and resize the image using Sharp
+  const compressedBuffer = await sharp(buffer)
+      .resize({ width: 800 }) // Resize to width of 800px
+      .jpeg({ quality: 70 })  // Compress to 70% quality
+      .toBuffer();
+
   // Detect the file type
-  const type = await fileType.fromBuffer(buffer);
+  const type = await fileType.fromBuffer(compressedBuffer);
   if (!type) {
     throw new Error('Unable to determine file type');
   }
@@ -62,10 +69,30 @@ async function saveBase64Image(base64String, outputFolder = './media/uploads') {
   const filepath = path.join(outputFolder, filename);
 
   // Write to file
-  await writeFile(filepath, buffer);
+  await writeFile(filepath, compressedBuffer);
   console.log(`Saved file to ${filepath}`);
   return filename;
 }
 
+async function removeImage (filename, outputFolder = './media/uploads') {
+  try {
+    const filepath = path.join(outputFolder, filename);
+    console.log(filepath);
+    if (fs.existsSync(filepath)) {
+      fs.unlink(filepath, (err) => {
+        if (err) {
+          console.error('Error deleting the file:', err);
+          return;
+        }
+        console.log('File deleted successfully');
+      });
+    } else {
+      console.log('File does not exist');
+    }
+  } catch (error) {
+    console.log('Error deleting the file:', error);
+  }
+  
+}
 
-module.exports = { saveBase64Image };
+module.exports = { saveBase64Image, removeImage };
