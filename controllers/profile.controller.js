@@ -207,7 +207,7 @@ exports.updateProfile = async (req, res) => {
                         country: user.country,
                         country_code: user.country_code,
                         platform_type: user.platform_type,
-                        profile_image: req.protocol  + '://' + req.get('host') + '/images/profile/' +user.profile_image,
+                        profile_image: user.profile_image != null ? req.protocol  + '://' + req.get('host') + '/images/profile/' +user.profile_image : "",
                         created_at: user.createdAt,
                         updated_at: user.updatedAt,
                         profile_details : profile_details
