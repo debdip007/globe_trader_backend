@@ -1,6 +1,6 @@
 const db = require("../models/index.js");
 const helper = require("../helper/index.js");
-const { Op } = require('sequelize');
+const { Op, where } = require('sequelize');
 const { saveBase64Image, removeImage } = require('../helper/image.helper.js');
 const { getCategoryName } = require('../helper/profile.helper.js');
 const Products = db.product;
@@ -201,11 +201,19 @@ exports.addAdditionalImage = async (req, res) => {
 
     const device_type = req.headers["device_type"];  
     const { product_id, status, sort_order, image } = req.body;
+
+    const products = await Products.findOn({
+      where : {id : product_id}
+    });
+
+    if(!products) {
+      return res.status(401).send({ success: 0, message: "Product Not Found"});
+    }
     
     if(image != "") {
       savedPath = await saveBase64Image(image);
     }else{
-      res.status(401).send({ success: 0, message: "Image is missing"});
+      return res.status(401).send({ success: 0, message: "Image is missing"});
     }
     
     const productAdditionalImageCreate = await AdditionalImage.create({       
