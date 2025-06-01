@@ -22,8 +22,16 @@ async function getProfileDetails(userId, userType) {
                     buyer_id : userId
                 }
             });
-            profileDetails.interest_category = await getCategoryName(profileDetails.interest_category);
-            profileDetails.interest_sub_category = await getCategoryName(profileDetails.interest_sub_category);
+
+            if(profileDetails != null && profileDetails.interest_category != null && profileDetails.interest_category != undefined) {
+                profileDetails.interest_category = await getCategoryName(profileDetails.interest_category);
+            }
+
+            if(profileDetails != null && profileDetails.interest_sub_category != null && profileDetails.interest_sub_category != undefined) {
+                profileDetails.interest_sub_category = await getCategoryName(profileDetails.interest_sub_category);
+            }
+            
+            
             break;
         default:
             break;
