@@ -202,7 +202,7 @@ exports.addAdditionalImage = async (req, res) => {
     const device_type = req.headers["device_type"];  
     const { product_id, status, sort_order, image } = req.body;
 
-    const products = await Products.findOn({
+    const products = await Products.findOne({
       where : {id : product_id}
     });
 
