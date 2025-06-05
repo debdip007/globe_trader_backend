@@ -231,3 +231,51 @@ exports.updateProfile = async (req, res) => {
     });
   }
 };
+
+exports.viewProfile = async (req, res) => {
+  try {
+    let profile_details = {};
+    const userID = req.params.id;
+
+    const user = await User.findOne({
+      where: {
+        id: userID
+      }
+    });
+
+    if (!user) {
+      return res.status(401).send({ 
+        success: 0,
+        message: "User Not found." 
+      });
+    }
+
+    profile_details = await getProfileDetails(user.id, user.user_type);
+
+    res.status(200).send({
+      success: 1, 
+      message: "User Details Found.",
+      details : {
+        id: user.id,
+        fullname: user.fullname,
+        email: user.email,      
+        phone: user.phone,
+        status: user.status,
+        user_type: user.user_type,
+        is_verified: user.is_verified,
+        country: user.country,
+        country_code: user.country_code,
+        platform_type: user.platform_type,
+        profile_image: user.profile_image != null ? req.protocol  + '://' + req.get('host') + '/images/profile/' +user.profile_image : "",
+        created_at: user.createdAt,
+        updated_at: user.updatedAt,
+        profile_details : profile_details
+      }      
+    });
+  } catch (err) {
+    res.status(500).send({ 
+      success: 0, 
+      message: err.message 
+    });
+  }  
+};

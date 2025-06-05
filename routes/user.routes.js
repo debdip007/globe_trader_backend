@@ -20,5 +20,6 @@ router.post("/preferences/save", verifyToken, userController.savePreference);
 router.post("/interest/save", verifyToken, userController.saveInterest);
 
 router.post("/profile/update", verifyToken, profileController.updateProfile);
+router.get("/profile/view/:id", verifyToken, profileController.viewProfile);
 
 module.exports = router;
