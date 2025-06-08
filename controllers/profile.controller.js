@@ -58,10 +58,28 @@ exports.updateProfile = async (req, res) => {
                 where : {id : user.id}    
             });
 
-            return res.status(200).send({
-                success: 1, 
-                message: "Profile Image updated."      
-            });
+            profile_details = await getProfileDetails(user_id, user.user_type);
+            
+            // return res.status(200).send({
+            //     success: 1, 
+            //     message: "Profile Image updated.",
+            //     details : {
+            //         id: user.id,
+            //         fullname: user.fullname,
+            //         email: user.email,      
+            //         phone: user.phone,
+            //         status: user.status,
+            //         user_type: user.user_type,
+            //         is_verified: user.is_verified,
+            //         country: user.country,
+            //         country_code: user.country_code,
+            //         platform_type: user.platform_type,
+            //         profile_image: user.profile_image != null ? req.protocol  + '://' + req.get('host') + '/images/profile/' +user.profile_image : "",
+            //         created_at: user.createdAt,
+            //         updated_at: user.updatedAt,
+            //         profile_details : profile_details
+            //     }                    
+            // });
         }
 
         if(country != "" || country_code != "" || fullname != "" || phone != "") {
@@ -117,28 +135,28 @@ exports.updateProfile = async (req, res) => {
                     });
                 }
                 
-                profile_details = await getProfileDetails(user_id, __sellerType);
+                // profile_details = await getProfileDetails(user_id, __sellerType);
 
-                return res.status(200).send({
-                    success: 1, 
-                    message: "User Profile Updated.",
-                    details : {
-                        id: user.id,
-                        fullname: user.fullname,
-                        email: user.email,      
-                        phone: user.phone,
-                        status: user.status,
-                        user_type: user.user_type,
-                        is_verified: user.is_verified,
-                        country: user.country,
-                        country_code: user.country_code,
-                        platform_type: user.platform_type,
-                        profile_image: user.profile_image,
-                        created_at: user.createdAt,
-                        updated_at: user.updatedAt,
-                        profile_details : profile_details
-                    }     
-                });
+                // return res.status(200).send({
+                //     success: 1, 
+                //     message: "User Profile Updated.",
+                //     details : {
+                //         id: user.id,
+                //         fullname: user.fullname,
+                //         email: user.email,      
+                //         phone: user.phone,
+                //         status: user.status,
+                //         user_type: user.user_type,
+                //         is_verified: user.is_verified,
+                //         country: user.country,
+                //         country_code: user.country_code,
+                //         platform_type: user.platform_type,
+                //         profile_image: user.profile_image != null ? req.protocol  + '://' + req.get('host') + '/images/profile/' +user.profile_image : "",
+                //         created_at: user.createdAt,
+                //         updated_at: user.updatedAt,
+                //         profile_details : profile_details
+                //     }     
+                // });
                 break;
 
             case "BUYER":
@@ -191,33 +209,63 @@ exports.updateProfile = async (req, res) => {
                     });
                 }
                 
-                profile_details = await getProfileDetails(user_id, __buyerType);
+                // profile_details = await getProfileDetails(user_id, __buyerType);
 
-                return res.status(200).send({
-                    success: 1, 
-                    message: "User Profile Updated.",
-                    details : {
-                        id: user.id,
-                        fullname: user.fullname,
-                        email: user.email,      
-                        phone: user.phone,
-                        status: user.status,
-                        user_type: user.user_type,
-                        is_verified: user.is_verified,
-                        country: user.country,
-                        country_code: user.country_code,
-                        platform_type: user.platform_type,
-                        profile_image: user.profile_image != null ? req.protocol  + '://' + req.get('host') + '/images/profile/' +user.profile_image : "",
-                        created_at: user.createdAt,
-                        updated_at: user.updatedAt,
-                        profile_details : profile_details
-                    }    
-                });
+                // return res.status(200).send({
+                //     success: 1, 
+                //     message: "User Profile Updated.",
+                //     details : {
+                //         id: user.id,
+                //         fullname: user.fullname,
+                //         email: user.email,      
+                //         phone: user.phone,
+                //         status: user.status,
+                //         user_type: user.user_type,
+                //         is_verified: user.is_verified,
+                //         country: user.country,
+                //         country_code: user.country_code,
+                //         platform_type: user.platform_type,
+                //         profile_image: user.profile_image != null ? req.protocol  + '://' + req.get('host') + '/images/profile/' +user.profile_image : "",
+                //         created_at: user.createdAt,
+                //         updated_at: user.updatedAt,
+                //         profile_details : profile_details
+                //     }    
+                // });
                 
                 break;
             default:
                 break;
         }
+
+        const updatedUser = await User.findOne({
+            where: {
+                id : user_id,
+                user_type : user_type,
+                status: 1
+            }
+        });
+        profile_details = await getProfileDetails(user_id, user_type);
+
+        return res.status(200).send({
+            success: 1, 
+            message: "User Profile Updated.",
+            details : {
+                id: updatedUser.id,
+                fullname: updatedUser.fullname,
+                email: updatedUser.email,      
+                phone: updatedUser.phone,
+                status: updatedUser.status,
+                updatedUser_type: updatedUser.user_type,
+                is_verified: updatedUser.is_verified,
+                country: updatedUser.country,
+                country_code: updatedUser.country_code,
+                platform_type: updatedUser.platform_type,
+                profile_image: updatedUser.profile_image != null ? req.protocol  + '://' + req.get('host') + '/images/profile/' +updatedUser.profile_image : "",
+                created_at: updatedUser.createdAt,
+                updated_at: updatedUser.updatedAt,
+                profile_details : profile_details
+            }    
+        });
     }else{
         return res.status(401).send({ 
             success: 0,
