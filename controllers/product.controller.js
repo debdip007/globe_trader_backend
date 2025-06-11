@@ -12,15 +12,16 @@ require("dotenv").config();
 
 exports.getProducts = async (req, res) => {
   try {
-    let userType = page = pageSize = ""; 
+    let userType = page = pageSize = "";
+    let trending = false;  
     let returnObj = {};
     const productId = req.params.id;
     
     if(req.body !== undefined) {
         page = req.body.page == "" ? 0 : req.body.page;
-        pageSize = req.body.page_size == "" ? 20 : req.body.page_size;
-        userType = req.body.user_type == "" ? "SELLER" : req.body.user_type;    
-        trending = req.body.trending == "" ? false : req.body.trending;    
+        pageSize = req.body.page_size == "" || req.body.page_size == undefined ? 20 : req.body.page_size;
+        userType = req.body.user_type == "" || req.body.user_type == undefined ? "SELLER" : req.body.user_type;    
+        trending = req.body.trending == "" || req.body.trending == undefined ? false : req.body.trending;    
     }
     sellerId = req.userId;
 
