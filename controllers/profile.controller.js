@@ -255,7 +255,7 @@ exports.updateProfile = async (req, res) => {
                 email: updatedUser.email,      
                 phone: updatedUser.phone,
                 status: updatedUser.status,
-                updatedUser_type: updatedUser.user_type,
+                user_type: updatedUser.user_type,
                 is_verified: updatedUser.is_verified,
                 country: updatedUser.country,
                 country_code: updatedUser.country_code,
