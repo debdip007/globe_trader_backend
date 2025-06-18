@@ -106,6 +106,7 @@ exports.updateProfile = async (req, res) => {
                 if(checkSeller && checkSeller != null) {
                     const sellerProfileUpdate = await SellerProfile.update({       
                         company_name,
+                        company_type,
                         website,
                         business_registration_number,
                         business_email_address,
@@ -123,6 +124,7 @@ exports.updateProfile = async (req, res) => {
                     const sellerProfileCreate = await SellerProfile.create({       
                         seller_id : user_id,
                         company_name,
+                        company_type,
                         website,
                         business_registration_number,
                         business_email_address,
