@@ -2,6 +2,7 @@ const db = require("../models/index.js");
 const SellerProfile = db.sellerprofile;
 const BuyerProfile = db.buyerProfile;
 const User = db.user;
+const jwt = require("jsonwebtoken");
 const { saveBase64Image } = require('../helper/image.helper.js');
 const { getProfileDetails } = require('../helper/profile.helper.js');
 
@@ -248,6 +249,10 @@ exports.updateProfile = async (req, res) => {
         });
         profile_details = await getProfileDetails(user_id, user_type);
 
+        const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, {
+            expiresIn: 3600 // 1 hours
+        });
+
         return res.status(200).send({
             success: 1, 
             message: "User Profile Updated.",
@@ -265,7 +270,8 @@ exports.updateProfile = async (req, res) => {
                 profile_image: updatedUser.profile_image != null ? req.protocol  + '://' + req.get('host') + '/images/profile/' +updatedUser.profile_image : "",
                 created_at: updatedUser.createdAt,
                 updated_at: updatedUser.updatedAt,
-                profile_details : profile_details
+                accessToken: token,
+                profile_details : profile_details                
             }    
         });
     }else{
@@ -300,6 +306,10 @@ exports.viewProfile = async (req, res) => {
       });
     }
 
+    const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, {
+        expiresIn: 3600 // 1 hours
+    });
+
     profile_details = await getProfileDetails(user.id, user.user_type);
 
     res.status(200).send({
@@ -319,6 +329,7 @@ exports.viewProfile = async (req, res) => {
         profile_image: user.profile_image != null ? req.protocol  + '://' + req.get('host') + '/images/profile/' +user.profile_image : "",
         created_at: user.createdAt,
         updated_at: user.updatedAt,
+        accessToken: token,
         profile_details : profile_details
       }      
     });
