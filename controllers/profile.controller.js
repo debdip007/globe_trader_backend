@@ -37,7 +37,11 @@ exports.updateProfile = async (req, res) => {
             country_code,
             fullname,
             phone,
-            profile_image } = req.body;
+            profile_image,
+            first_name,
+            last_name,
+            user_role 
+        } = req.body;
 
     const user = await User.findOne({
         where: {
@@ -89,7 +93,10 @@ exports.updateProfile = async (req, res) => {
                 phone,
                 country,
                 country_code,
-                device_type : device_type
+                device_type : device_type,
+                first_name,
+                last_name,
+                user_role 
             }, 
             {
                 where : {id : user.id}    
@@ -271,6 +278,9 @@ exports.updateProfile = async (req, res) => {
                 created_at: updatedUser.createdAt,
                 updated_at: updatedUser.updatedAt,
                 accessToken: token,
+                first_name : updatedUser.first_name,
+                last_name : updatedUser.last_name,
+                user_role : updatedUser.user_role, 
                 profile_details : profile_details                
             }    
         });

@@ -67,7 +67,7 @@ exports.generateOtp = async (req, res) => {
 
 exports.register = async (req, res) => {
   try {
-    const { fullname, email, password, country, country_code, phone, status, user_type, is_verified, platform_type, profile_image, otp, attempt } = req.body;
+    const { fullname, email, password, country, country_code, phone, status, user_type, is_verified, platform_type, profile_image, otp, attempt, first_name, last_name, user_role } = req.body;
     
     const checkotp = await RegisterOTP.findOne({ where: { email: email, otp: otp } });
 
@@ -94,7 +94,10 @@ exports.register = async (req, res) => {
         status: statusCode,
         user_type,
         is_verified: 1,
-        platform_type
+        platform_type,
+        first_name,
+        last_name,
+        user_role 
       });
 
       res.status(200).send({ success: 1, message: "User registered successfully!" });
@@ -171,6 +174,9 @@ exports.login = async (req, res) => {
         created_at: user.createdAt,
         updated_at: user.updatedAt,
         accessToken: token,
+        first_name : user.first_name,
+        last_name : user.last_name,
+        user_role : user.user_role, 
         profile_details : profile_details
       }      
     });
@@ -223,6 +229,9 @@ exports.refreshToken = async (req, res) => {
         created_at: user.createdAt,
         updated_at: user.updatedAt,
         accessToken: token,
+        first_name : user.first_name,
+        last_name : user.last_name,
+        user_role : user.user_role,
         profile_details : profile_details
       }      
     });

@@ -26,7 +26,10 @@ module.exports = (sequelize, DataTypes) => {
     social_type: DataTypes.STRING,
     social_token: DataTypes.TEXT,
     password: DataTypes.TEXT,
-    profile_image: DataTypes.TEXT
+    profile_image: DataTypes.TEXT,
+    first_name: DataTypes.TEXT,
+    last_name: DataTypes.TEXT,
+    user_role: DataTypes.TEXT
   }, {
     sequelize,
     modelName: 'User',

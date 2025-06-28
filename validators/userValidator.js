@@ -7,9 +7,9 @@ const otpValidationRules = [
 ];
 
 const registerValidationRules = [
-  body('fullname')
+  body('first_name')
     .notEmpty()
-    .withMessage('Fullname is required.'),
+    .withMessage('First Name is required.'),
   body('email')
     .isEmail()
     .withMessage('A valid email is required.'),
