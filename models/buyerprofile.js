@@ -29,7 +29,8 @@ module.exports = (sequelize, DataTypes) => {
     business_address : DataTypes.TEXT,
     business_city : DataTypes.TEXT,
     business_state : DataTypes.TEXT,
-    business_pincode : DataTypes.TEXT
+    business_pincode : DataTypes.TEXT,
+    business_description : DataTypes.TEXT
   }, {
     sequelize,
     modelName: 'BuyerProfile',

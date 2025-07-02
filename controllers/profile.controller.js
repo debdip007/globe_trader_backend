@@ -40,7 +40,8 @@ exports.updateProfile = async (req, res) => {
             profile_image,
             first_name,
             last_name,
-            user_role 
+            user_role,
+            business_description 
         } = req.body;
 
     const user = await User.findOne({
@@ -123,7 +124,8 @@ exports.updateProfile = async (req, res) => {
                         business_address,
                         business_city,
                         business_state,
-                        business_pincode
+                        business_pincode,
+                        business_description
                     },
                     {
                         where : {id : checkSeller.id} 
@@ -141,7 +143,8 @@ exports.updateProfile = async (req, res) => {
                         business_address,
                         business_city,
                         business_state,
-                        business_pincode
+                        business_pincode,
+                        business_description
                     });
                 }
                 
@@ -192,7 +195,8 @@ exports.updateProfile = async (req, res) => {
                         business_state,
                         business_pincode,
                         interest_category : JSON.stringify(interest_category),
-                        interest_sub_category : JSON.stringify(interest_sub_category)
+                        interest_sub_category : JSON.stringify(interest_sub_category),
+                        business_description
                     },
                     {
                         where : {id : checkBuyer.id}
@@ -215,7 +219,8 @@ exports.updateProfile = async (req, res) => {
                         business_state,
                         business_pincode,
                         interest_category : JSON.stringify(interest_category),
-                        interest_sub_category : JSON.stringify(interest_sub_category)
+                        interest_sub_category : JSON.stringify(interest_sub_category),
+                        business_description
                     });
                 }
                 
@@ -281,7 +286,7 @@ exports.updateProfile = async (req, res) => {
                 first_name : updatedUser.first_name,
                 last_name : updatedUser.last_name,
                 user_role : updatedUser.user_role, 
-                profile_details : profile_details                
+                profile_details : profile_details             
             }    
         });
     }else{
