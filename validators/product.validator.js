@@ -6,10 +6,7 @@ const createProductValidator = [
     .withMessage('Product Name is required.'),
   body('sku')
     .notEmpty()
-    .withMessage('Product SKU is required.'),
-  body('category')
-    .notEmpty()
-    .withMessage('Category is required.')
+    .withMessage('Product SKU is required.')
 ];
 
 module.exports = {
