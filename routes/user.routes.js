@@ -8,7 +8,7 @@ const { createProductValidator } = require('../validators/product.validator');
 const validate = require('../middlewares/validate');
 
 router.post("/product/create", createProductValidator , validate, verifyToken, productController.createProduct);
-router.post("/product/update", verifyToken, productController.getProducts);
+router.post("/product/update", verifyToken, productController.createProduct);
 
 router.post("/products", verifyToken, productController.getProducts);
 router.get("/product/:id", verifyToken, productController.getProducts);

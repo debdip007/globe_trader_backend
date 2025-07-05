@@ -142,12 +142,10 @@ exports.createProduct = async (req, res) => {
     const device_type = req.headers["device_type"];
 
     let category_string = sub_category_string = country_string = "";     
-    const { product_name, sku, main_image, product_capacity, country, product_description, status, include, category, sub_category, product_quantity, product_unit, minimum_order_qty, minimum_order_qty_unit } = req.body;
+    const { product_id, product_name, sku, main_image, product_capacity, country, product_description, status, include, category, sub_category, product_quantity, product_unit, minimum_order_qty, minimum_order_qty_unit } = req.body;
     
-    if(main_image != "") {
+    if(main_image != "" && main_image != undefined) {
       savedPath = await saveBase64Image(main_image);
-    }else{
-      res.status(401).send({ success: 0, message: "Product Main Image is missing"});
     }
 
     if(category != "") {
@@ -159,31 +157,143 @@ exports.createProduct = async (req, res) => {
 
     if(country != "") {
         country_string = JSON.stringify(country);
-    }   
+    } 
     
-    const productCreate = await Products.create({       
-        product_name,
-        sku,
-        main_image:savedPath,
-        product_capacity,
-        country : country_string,
-        product_description,
-        category : category_string,
-        sub_category: sub_category_string,
-        status,
-        include,
-        seller_id: sellerId,
-        device_type: device_type,
-        product_quantity,
-        product_unit,
-        minimum_order_qty,
-        minimum_order_qty_unit
-    });
+    if(product_id == "" || product_id == undefined ) {
+      const productCreate = await Products.create({       
+          product_name,
+          sku,
+          main_image:savedPath,
+          product_capacity,
+          country : country_string,
+          product_description,
+          category : category_string,
+          sub_category: sub_category_string,
+          status,
+          include,
+          seller_id: sellerId,
+          device_type: device_type,
+          product_quantity,
+          product_unit,
+          minimum_order_qty,
+          minimum_order_qty_unit
+      });
 
-    res.status(200).send({
-      success: 1, 
-      message: "Product created successfully!",         
-    });
+      const updateProduct = await Products.findOne({
+        where : {id : productCreate.id}
+      });
+
+      const updateProductObj = updateProduct.toJSON();
+
+      const categoryName = await getCategoryName(updateProductObj.category);
+      const subCategoryName = await getCategoryName(updateProductObj.sub_category);
+      const seller = await getUserDetails(updateProductObj.seller_id);
+      const additionalImage = await getAdditionalImage(updateProductObj.id);
+      
+      updateProductObj.country = JSON.parse(updateProductObj.country);
+      updateProductObj.category = JSON.parse(updateProductObj.category);
+      updateProductObj.sub_category = JSON.parse(updateProductObj.sub_category);
+      updateProductObj.main_image = req.protocol  + '://' + req.get('host') + '/images/' +updateProductObj.main_image;
+      updateProductObj.additional_image = [];
+
+      updateProductObj.category_name = categoryName;
+      updateProductObj.subCategory_name = subCategoryName;
+      updateProductObj.additional_image = additionalImage;
+
+      return res.status(200).send({
+        success: 1, 
+        message: "Product created successfully!",  
+        details: updateProductObj       
+      });
+    }else{
+      let updatedImage = "";
+      const product = await Products.findOne({
+        where : {id : product_id}
+      });
+
+      if(savedPath != "") {
+        const productUpdate = await Products.update({
+          main_image:savedPath
+        },
+        {
+          where : {id: product_id}
+        });
+        
+        const updateProduct = await Products.findOne({
+          where : {id : product_id}
+        });
+
+        const updateProductObj = updateProduct.toJSON();
+
+        const categoryName = await getCategoryName(updateProductObj.category);
+        const subCategoryName = await getCategoryName(updateProductObj.sub_category);
+        const seller = await getUserDetails(updateProductObj.seller_id);
+        const additionalImage = await getAdditionalImage(updateProductObj.id);
+        
+        updateProductObj.country = JSON.parse(updateProductObj.country);
+        updateProductObj.category = JSON.parse(updateProductObj.category);
+        updateProductObj.sub_category = JSON.parse(updateProductObj.sub_category);
+        updateProductObj.main_image = req.protocol  + '://' + req.get('host') + '/images/' +updateProductObj.main_image;
+        updateProductObj.additional_image = [];
+
+        updateProductObj.category_name = categoryName;
+        updateProductObj.subCategory_name = subCategoryName;
+        updateProductObj.additional_image = additionalImage;
+
+        return res.status(200).send({
+          success: 1, 
+          message: "Product image Updated successfully!",         
+          details: updateProductObj
+        });
+      }
+
+      const productUpdate = await Products.update({       
+          product_name,
+          product_capacity,
+          country : country_string,
+          product_description,
+          category : category_string,
+          sub_category: sub_category_string,
+          status,
+          include,
+          seller_id: sellerId,
+          device_type: device_type,
+          product_quantity,
+          product_unit,
+          minimum_order_qty,
+          minimum_order_qty_unit
+      },
+      {
+        where : {id : product_id}
+      });
+
+      const updateProduct = await Products.findOne({
+        where : {id : product_id}
+      });
+
+      const updateProductObj = updateProduct.toJSON();
+
+      const categoryName = await getCategoryName(updateProductObj.category);
+      const subCategoryName = await getCategoryName(updateProductObj.sub_category);
+      const seller = await getUserDetails(updateProductObj.seller_id);
+      const additionalImage = await getAdditionalImage(updateProductObj.id);
+      
+      updateProductObj.country = JSON.parse(updateProductObj.country);
+      updateProductObj.category = JSON.parse(updateProductObj.category);
+      updateProductObj.sub_category = JSON.parse(updateProductObj.sub_category);
+      updateProductObj.main_image = req.protocol  + '://' + req.get('host') + '/images/' +updateProductObj.main_image;
+      updateProductObj.additional_image = [];
+
+      updateProductObj.category_name = categoryName;
+      updateProductObj.subCategory_name = subCategoryName;
+      updateProductObj.additional_image = additionalImage;
+
+      return res.status(200).send({
+        success: 1, 
+        message: "Product Updated successfully!",         
+        details: updateProductObj
+      });
+    }
   } catch (error) {
     if (error.name === 'SequelizeUniqueConstraintError') {
       res.status(500).send({ success: 0, message: "Product with same SKU already exists." });
@@ -224,9 +334,31 @@ exports.addAdditionalImage = async (req, res) => {
         sort_order
     });
 
+    const updateProduct = await Products.findOne({
+      where : {id : product_id}
+    });
+
+    const updateProductObj = updateProduct.toJSON();
+
+    const categoryName = await getCategoryName(updateProductObj.category);
+    const subCategoryName = await getCategoryName(updateProductObj.sub_category);
+    const seller = await getUserDetails(updateProductObj.seller_id);
+    const additionalImage = await getAdditionalImage(updateProductObj.id);
+    
+    updateProductObj.country = JSON.parse(updateProductObj.country);
+    updateProductObj.category = JSON.parse(updateProductObj.category);
+    updateProductObj.sub_category = JSON.parse(updateProductObj.sub_category);
+    updateProductObj.main_image = req.protocol  + '://' + req.get('host') + '/images/' +updateProductObj.main_image;
+    updateProductObj.additional_image = [];
+
+    updateProductObj.category_name = categoryName;
+    updateProductObj.subCategory_name = subCategoryName;
+    updateProductObj.additional_image = additionalImage;
+
     res.status(200).send({
       success: 1, 
-      message: "Product additional image added successfully!",         
+      message: "Product additional image added successfully!",
+      details: updateProductObj         
     });
   } catch (error) {
     res.status(500).send({ success: 0, message: 'Error inserting new additional image:', error });
@@ -246,15 +378,39 @@ exports.removeAdditionalImage = async (req, res) => {
     const additional_image = await AdditionalImage.findByPk(id);
     
     if(additional_image) {
+      let product_id = additional_image.product_id;
+
       await removeImage(additional_image.image);
       
       const deletedAdditionalImage = await AdditionalImage.destroy({
         where: { id: id }
       });
 
+      const updateProduct = await Products.findOne({
+        where : {id : product_id}
+      });
+
+      const updateProductObj = updateProduct.toJSON();
+
+      const categoryName = await getCategoryName(updateProductObj.category);
+      const subCategoryName = await getCategoryName(updateProductObj.sub_category);
+      const seller = await getUserDetails(updateProductObj.seller_id);
+      const additionalImage = await getAdditionalImage(updateProductObj.id);
+      
+      updateProductObj.country = JSON.parse(updateProductObj.country);
+      updateProductObj.category = JSON.parse(updateProductObj.category);
+      updateProductObj.sub_category = JSON.parse(updateProductObj.sub_category);
+      updateProductObj.main_image = req.protocol  + '://' + req.get('host') + '/images/' +updateProductObj.main_image;
+      updateProductObj.additional_image = [];
+
+      updateProductObj.category_name = categoryName;
+      updateProductObj.subCategory_name = subCategoryName;
+      updateProductObj.additional_image = additionalImage;
+
       res.status(200).send({
         success: 1, 
-        message: "Product additional image deleted successfully!",         
+        message: "Product additional image deleted successfully!",   
+        details: updateProductObj      
       });
       
     }else{
