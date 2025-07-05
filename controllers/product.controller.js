@@ -62,6 +62,8 @@ exports.getProducts = async (req, res) => {
                 const additionalImage = await getAdditionalImage(obj.id);
 
                 obj.country = JSON.parse(obj.country);
+                obj.category = JSON.parse(obj.category);
+                obj.sub_category = JSON.parse(obj.sub_category);
                 obj.main_image = req.protocol  + '://' + req.get('host') + '/images/' +obj.main_image;
                 obj.category_name = categoryName;
                 obj.subCategory_name = subCategoryName;
