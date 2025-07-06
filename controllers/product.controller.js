@@ -46,7 +46,7 @@ exports.getProducts = async (req, res) => {
         );
 
         if (!products || products.length === 0) {
-            return res.status(401).send({ 
+            return res.status(500).send({ 
                 success: 0,
                 message: "No Products found." 
             });
@@ -94,7 +94,7 @@ exports.getProducts = async (req, res) => {
         });
 
         if (!products || products.length === 0) {
-            return res.status(401).send({ 
+            return res.status(500).send({ 
                 success: 0,
                 message: "No Products found." 
             });
