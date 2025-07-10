@@ -31,9 +31,13 @@ async function getProfileDetails(userId, userType) {
             if(profileDetails != null && profileDetails.interest_sub_category != null && profileDetails.interest_sub_category != undefined) {
                 // profileDetails.interest_sub_category = await getCategoryName(profileDetails.interest_sub_category);
                 profileDetails.interest_sub_category = JSON.parse(profileDetails.interest_sub_category);
-            }
-            
-            
+            } 
+            // Add additional category key
+            const obj = profileDetails.toJSON();
+            obj.interest_category_details = await getCategoryDetails(profileDetails.interest_category);
+            obj.interest_sub_category_details = await getCategoryDetails(profileDetails.interest_sub_category);
+
+            return obj;
             break;
         default:
             break;
@@ -63,4 +67,26 @@ async function getCategoryName (categoryIdArray) {
   
 }
 
-module.exports = { getProfileDetails, getCategoryName };
+
+async function getCategoryDetails (categoryIdArray) {
+  try {
+    let modifiedCategoryObj = [];
+    const category = await Categories.findAll({
+        where: {
+          id: {
+            [Op.in]: categoryIdArray
+          }    
+        }
+    });
+    // category.forEach((item) => {
+    //   modifiedCategoryObj.push(item.name);
+    // });
+    return category;
+  } catch (error) {
+    console.error('Error getting catagory name:', error);
+  }  
+  
+}
+
+
+module.exports = { getProfileDetails, getCategoryName, getCategoryDetails };
