@@ -41,7 +41,8 @@ exports.updateProfile = async (req, res) => {
             first_name,
             last_name,
             user_role,
-            business_description 
+            business_description,
+            business_country_names 
         } = req.body;
 
     const user = await User.findOne({
@@ -125,7 +126,8 @@ exports.updateProfile = async (req, res) => {
                         business_city,
                         business_state,
                         business_pincode,
-                        business_description
+                        business_description,
+                        business_country_names : JSON.stringify(business_country_names)
                     },
                     {
                         where : {id : checkSeller.id} 
@@ -144,7 +146,8 @@ exports.updateProfile = async (req, res) => {
                         business_city,
                         business_state,
                         business_pincode,
-                        business_description
+                        business_description,
+                        business_country_names : JSON.stringify(business_country_names)
                     });
                 }
                 
@@ -196,7 +199,8 @@ exports.updateProfile = async (req, res) => {
                         business_pincode,
                         interest_category : JSON.stringify(interest_category),
                         interest_sub_category : JSON.stringify(interest_sub_category),
-                        business_description
+                        business_description,
+                        business_country_names : JSON.stringify(business_country_names)
                     },
                     {
                         where : {id : checkBuyer.id}
@@ -220,7 +224,8 @@ exports.updateProfile = async (req, res) => {
                         business_pincode,
                         interest_category : JSON.stringify(interest_category),
                         interest_sub_category : JSON.stringify(interest_sub_category),
-                        business_description
+                        business_description,
+                        business_country_names : JSON.stringify(business_country_names)
                     });
                 }
                 

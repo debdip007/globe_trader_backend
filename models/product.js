@@ -29,7 +29,8 @@ module.exports = (sequelize, DataTypes) => {
     seller_id: DataTypes.INTEGER,
     device_type: DataTypes.STRING,
     minimum_order_qty_unit: DataTypes.TEXT,
-    product_quantity: DataTypes.TEXT
+    product_quantity: DataTypes.TEXT,
+    product_capacity_unit: DataTypes.TEXT
   }, {
     sequelize,
     modelName: 'Product',

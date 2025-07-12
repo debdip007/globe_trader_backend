@@ -144,7 +144,7 @@ exports.createProduct = async (req, res) => {
     const device_type = req.headers["device_type"];
 
     let category_string = sub_category_string = country_string = "";     
-    const { product_id, product_name, sku, main_image, product_capacity, country, product_description, status, include, category, sub_category, product_quantity, product_unit, minimum_order_qty, minimum_order_qty_unit } = req.body;
+    const { product_id, product_name, sku, main_image, product_capacity, country, product_description, status, include, category, sub_category, product_quantity, product_unit, minimum_order_qty, minimum_order_qty_unit, product_capacity_unit } = req.body;
     
     if(main_image != "" && main_image != undefined) {
       savedPath = await saveBase64Image(main_image);
@@ -178,7 +178,8 @@ exports.createProduct = async (req, res) => {
           product_quantity,
           product_unit,
           minimum_order_qty,
-          minimum_order_qty_unit
+          minimum_order_qty_unit,
+          product_capacity_unit
       });
 
       const updateProduct = await Products.findOne({
@@ -263,7 +264,8 @@ exports.createProduct = async (req, res) => {
           product_quantity,
           product_unit,
           minimum_order_qty,
-          minimum_order_qty_unit
+          minimum_order_qty_unit,
+          product_capacity_unit
       },
       {
         where : {id : product_id}

@@ -15,6 +15,10 @@ async function getProfileDetails(userId, userType) {
                     seller_id : userId
                 }
             });
+
+            if(profileDetails != null && profileDetails.business_country_names != null && profileDetails.business_country_names != undefined) {
+                profileDetails.business_country_names = JSON.parse(profileDetails.business_country_names);
+            }
             break;
         case "BUYER":
             profileDetails = await BuyerProfile.findOne({
@@ -32,6 +36,10 @@ async function getProfileDetails(userId, userType) {
                 // profileDetails.interest_sub_category = await getCategoryName(profileDetails.interest_sub_category);
                 profileDetails.interest_sub_category = JSON.parse(profileDetails.interest_sub_category);
             } 
+
+            if(profileDetails != null && profileDetails.business_country_names != null && profileDetails.business_country_names != undefined) {
+                profileDetails.business_country_names = JSON.parse(profileDetails.business_country_names);
+            }
             // Add additional category key
             const obj = profileDetails.toJSON();
             obj.interest_category_details = await getCategoryDetails(profileDetails.interest_category);

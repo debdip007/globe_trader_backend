@@ -26,7 +26,8 @@ module.exports = (sequelize, DataTypes) => {
     business_state : DataTypes.TEXT,
     business_pincode : DataTypes.TEXT,
     company_type : DataTypes.TEXT,
-    business_description : DataTypes.TEXT
+    business_description : DataTypes.TEXT,
+    business_country_names : DataTypes.TEXT
   }, {
     sequelize,
     modelName: 'SellerProfile',
