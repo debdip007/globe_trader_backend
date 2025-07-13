@@ -451,10 +451,7 @@ async function getUserDetails (userId, req = null) {
   try {    
     const user = await User.findByPk(userId);
     const obj = user.toJSON(); 
-    if(obj.profile_image != null) {
-      obj.profile_image = req.protocol  + '://' + req.get('host') + '/images/profile/' +obj.profile_image;
-    }
-    
+    obj.profile_image = req.protocol  + '://' + req.get('host') + '/images/profile/' +obj.profile_image;
     return obj;
   } catch (error) {
     console.error('Error getting user details:', error);
