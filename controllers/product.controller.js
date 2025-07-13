@@ -58,7 +58,7 @@ exports.getProducts = async (req, res) => {
 
                 const categoryName = await getCategoryName(obj.category);
                 const subCategoryName = await getCategoryName(obj.sub_category);
-                const seller = await getUserDetails(obj.seller_id);
+                const seller = await getUserDetails(obj.seller_id, req);
                 const additionalImage = await getAdditionalImage(obj.id);
 
                 obj.country = JSON.parse(obj.country);
@@ -103,7 +103,7 @@ exports.getProducts = async (req, res) => {
 
             const categoryName = await getCategoryName(productObj.category);
             const subCategoryName = await getCategoryName(productObj.sub_category);
-            const seller = await getUserDetails(productObj.seller_id);
+            const seller = await getUserDetails(productObj.seller_id, req);
             const additionalImage = await getAdditionalImage(productObj.id);
             
             productObj.country = JSON.parse(productObj.country);
@@ -190,7 +190,7 @@ exports.createProduct = async (req, res) => {
 
       const categoryName = await getCategoryName(updateProductObj.category);
       const subCategoryName = await getCategoryName(updateProductObj.sub_category);
-      const seller = await getUserDetails(updateProductObj.seller_id);
+      const seller = await getUserDetails(updateProductObj.seller_id, req);
       const additionalImage = await getAdditionalImage(updateProductObj.id);
       
       updateProductObj.country = JSON.parse(updateProductObj.country);
@@ -230,7 +230,7 @@ exports.createProduct = async (req, res) => {
 
         const categoryName = await getCategoryName(updateProductObj.category);
         const subCategoryName = await getCategoryName(updateProductObj.sub_category);
-        const seller = await getUserDetails(updateProductObj.seller_id);
+        const seller = await getUserDetails(updateProductObj.seller_id, req);
         const additionalImage = await getAdditionalImage(updateProductObj.id);
         
         updateProductObj.country = JSON.parse(updateProductObj.country);
@@ -279,7 +279,7 @@ exports.createProduct = async (req, res) => {
 
       const categoryName = await getCategoryName(updateProductObj.category);
       const subCategoryName = await getCategoryName(updateProductObj.sub_category);
-      const seller = await getUserDetails(updateProductObj.seller_id);
+      const seller = await getUserDetails(updateProductObj.seller_id, req);
       const additionalImage = await getAdditionalImage(updateProductObj.id);
       
       updateProductObj.country = JSON.parse(updateProductObj.country);
@@ -346,7 +346,7 @@ exports.addAdditionalImage = async (req, res) => {
 
     const categoryName = await getCategoryName(updateProductObj.category);
     const subCategoryName = await getCategoryName(updateProductObj.sub_category);
-    const seller = await getUserDetails(updateProductObj.seller_id);
+    const seller = await getUserDetails(updateProductObj.seller_id, req);
     const additionalImage = await getAdditionalImage(updateProductObj.id);
     
     updateProductObj.country = JSON.parse(updateProductObj.country);
@@ -398,7 +398,7 @@ exports.removeAdditionalImage = async (req, res) => {
 
       const categoryName = await getCategoryName(updateProductObj.category);
       const subCategoryName = await getCategoryName(updateProductObj.sub_category);
-      const seller = await getUserDetails(updateProductObj.seller_id);
+      const seller = await getUserDetails(updateProductObj.seller_id, req);
       const additionalImage = await getAdditionalImage(updateProductObj.id);
       
       updateProductObj.country = JSON.parse(updateProductObj.country);
@@ -447,10 +447,12 @@ exports.removeAdditionalImage = async (req, res) => {
   
 }*/
 
-async function getUserDetails (userId) {
+async function getUserDetails (userId, req = null) {
   try {    
     const user = await User.findByPk(userId);
-    return user;
+    const obj = user.toJSON(); 
+    obj.profile_image = req.protocol  + '://' + req.get('host') + '/images/profile/' +obj.profile_image;
+    return obj;
   } catch (error) {
     console.error('Error getting user details:', error);
   }    
