@@ -116,7 +116,7 @@ exports.getProducts = async (req, res) => {
             productObj.subCategory_name = subCategoryName;
             productObj.additional_image = additionalImage;
             
-            if(userType == __buyerType) {
+            if(seller.user_type == __buyerType) {
               productObj.seller = seller;
             }
 
