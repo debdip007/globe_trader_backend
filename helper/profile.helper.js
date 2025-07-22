@@ -41,11 +41,13 @@ async function getProfileDetails(userId, userType) {
                 profileDetails.business_country_names = JSON.parse(profileDetails.business_country_names);
             }
             // Add additional category key
-            const obj = profileDetails.toJSON();
-            obj.interest_category_details = await getCategoryDetails(profileDetails.interest_category);
-            obj.interest_sub_category_details = await getCategoryDetails(profileDetails.interest_sub_category);
+            if(profileDetails != null) {
+              const obj = profileDetails.toJSON();
+              obj.interest_category_details = await getCategoryDetails(profileDetails.interest_category);
+              obj.interest_sub_category_details = await getCategoryDetails(profileDetails.interest_sub_category);
 
-            return obj;
+              return obj;
+            }            
             break;
         default:
             break;
