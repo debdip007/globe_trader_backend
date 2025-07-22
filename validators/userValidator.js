@@ -33,8 +33,15 @@ const loginValidationRules = [
     .withMessage('Password must be at least 6 characters long.')  
 ];
 
+const buyerListValidationRules = [
+  body('seller_id')
+    .notEmpty()
+    .withMessage('seller_id is required.')
+];
+
 module.exports = {
   otpValidationRules,
   registerValidationRules,
-  loginValidationRules
+  loginValidationRules,
+  buyerListValidationRules
 };

@@ -242,3 +242,55 @@ exports.refreshToken = async (req, res) => {
     });
   }
 };
+
+exports.getBuyerlist = async (req, res) => {
+  try {    
+    if(req.body !== undefined) {
+        page = req.body.page == "" ? 0 : req.body.page;
+        pageSize = req.body.page_size == "" || req.body.page_size == undefined ? null : req.body.page_size;    
+        sellerId = req.body.seller_id == "" || req.body.seller_id == undefined ? null : req.body.seller_id;    
+    }
+    // sellerId = req.userId;
+
+    const queryOptions = {      
+      order: [['id', 'DESC']],
+    };
+
+    queryOptions.where = {status: 1, user_type: "BUYER"};
+
+    if(pageSize != null) {
+      queryOptions.limit = pageSize;
+      queryOptions.offset = (page) * pageSize;
+    }
+
+    const buyerList = await User.findAll(
+        queryOptions         
+    );
+
+    const modifiedBuyerObj = await Promise.all(
+      buyerList.map(async (buyer) => {
+        const obj = buyer.toJSON(); // <-- Important!
+
+        const profile_details = await getProfileDetails(obj.id, obj.user_type);
+
+        obj.profile_image = obj.profile_image != null ? req.protocol  + '://' + req.get('host') + '/images/profile/' +obj.profile_image : "",
+        obj.profile_details = profile_details;
+
+        return {
+          ...obj                                  
+        };
+      })
+    );
+
+    return res.status(200).send({ 
+      success: 1,
+      message: "Buyer list found.",
+      details : modifiedBuyerObj
+    });
+  } catch (err) {
+    res.status(500).send({ 
+      success: 0, 
+      message: err.message 
+    });
+  }
+};
