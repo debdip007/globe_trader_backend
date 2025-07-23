@@ -4,6 +4,7 @@ const { Op, where } = require('sequelize');
 const { saveBase64Image, removeImage } = require('../helper/image.helper.js');
 const { getCategoryName } = require('../helper/profile.helper.js');
 const Products = db.product;
+const UserPreference = db.userPreference;
 const Categories = db.category;
 const AdditionalImage = db.additionalImage;
 const User = db.user;
@@ -15,6 +16,7 @@ exports.getProducts = async (req, res) => {
     let userType = page = pageSize = "";
     let trending = false;  
     let returnObj = {};
+    let preferredProductArr = [];
     const productId = req.params.id;
     
     if(req.body !== undefined) {
@@ -22,6 +24,7 @@ exports.getProducts = async (req, res) => {
         pageSize = req.body.page_size == "" || req.body.page_size == undefined ? 20 : req.body.page_size;
         userType = req.body.user_type == "" || req.body.user_type == undefined ? "SELLER" : req.body.user_type;    
         trending = req.body.trending == "" || req.body.trending == undefined ? false : req.body.trending;    
+        preferance = req.body.preferance == "" || req.body.preferance == undefined ? 0 : req.body.preferance;    
     }
     sellerId = req.userId;
 
@@ -38,6 +41,19 @@ exports.getProducts = async (req, res) => {
     if(trending == false) {
       queryOptions.limit = pageSize;
       queryOptions.offset = (page) * pageSize;
+    }
+
+    if(preferance == 1) {
+      const preferredProduct = await UserPreference.findAll({
+        attributes: ['product_id'],
+        where : {user_type : __buyerType, user_id : sellerId, preferance : 1}
+      });
+
+      preferredProduct.map(async (item) => {
+        preferredProductArr.push(item.toJSON().product_id);
+      });
+
+      queryOptions.where = {id : {[Op.in] : preferredProductArr}};
     }
 
     if(productId == null || productId == "") {
