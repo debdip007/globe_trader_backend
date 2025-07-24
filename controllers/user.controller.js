@@ -74,7 +74,7 @@ exports.saveInterest = async (req, res) => {
         buyer_id = userId;
 
         checkInterest = await BuyerInterest.findOne({
-          where : {user_type : user_type, seller_id : user_id, product_id: product_id, buyer_id : userId}
+          where : {user_type : user_type, seller_id : user_id, product_id: product_id, buyer_id : userId, status : 1}
         });
 
         if (checkInterest) {
@@ -90,7 +90,7 @@ exports.saveInterest = async (req, res) => {
         buyer_id = user_id;
 
         checkInterest = await BuyerInterest.findOne({
-          where : {user_type : user_type, seller_id : userId, buyer_id : user_id}
+          where : {user_type : user_type, seller_id : userId, buyer_id : user_id, status : 1}
         });
 
         if (checkInterest) {
