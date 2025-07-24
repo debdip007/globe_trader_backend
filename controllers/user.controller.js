@@ -227,10 +227,10 @@ exports.requestProductList = async (req, res) => {
           obj.product_details = await productDetailsByID(obj.product_id, req);
           if (userType == __buyerType) {
             obj.user_details = await getUserDetails(obj.seller_id, req);
-            obj.user_details.profile_details = await getProfileDetails(obj.seller_id, req);
+            obj.user_details.profile_details = await getProfileDetails(obj.seller_id, __sellerType);
           }else if(userType == __sellerType) {
             obj.user_details = await getUserDetails(obj.buyer_id, req);
-            obj.user_details.profile_details = await getProfileDetails(obj.buyer_id, req);
+            obj.user_details.profile_details = await getProfileDetails(obj.buyer_id, __buyerType);
           }
           return {
             ...obj                                  
