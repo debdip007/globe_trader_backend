@@ -3,6 +3,7 @@ const UserPreference = db.userPreference;
 const BuyerInterest = db.buyerInterest;
 require("dotenv").config();
 const { productDetailsByID, getUserDetails } = require('../helper/commonHelper.js');
+const { getProfileDetails } = require('../helper/profile.helper.js');
 
 exports.savePreference = async (req, res) => {
   try {
@@ -226,8 +227,10 @@ exports.requestProductList = async (req, res) => {
           obj.product_details = await productDetailsByID(obj.product_id, req);
           if (userType == __buyerType) {
             obj.user_details = await getUserDetails(obj.seller_id, req);
+            obj.user_details.profile_details = await getProfileDetails(obj.seller_id, req);
           }else if(userType == __sellerType) {
             obj.user_details = await getUserDetails(obj.buyer_id, req);
+            obj.user_details.profile_details = await getProfileDetails(obj.buyer_id, req);
           }
           return {
             ...obj                                  
