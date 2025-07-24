@@ -18,7 +18,9 @@ module.exports = (sequelize, DataTypes) => {
     product_id: DataTypes.INTEGER,
     seller_id: DataTypes.INTEGER,
     notes: DataTypes.TEXT,
-    status: DataTypes.INTEGER
+    status: DataTypes.INTEGER,
+    user_type: DataTypes.TEXT,
+    accept: DataTypes.TEXT
   }, {
     sequelize,
     modelName: 'BuyerInterest',

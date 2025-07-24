@@ -2,10 +2,12 @@ const db = require("../models/index.js");
 const helper = require("../helper/index.js");
 const User = db.user;
 const RegisterOTP = db.registerotp;
+const BuyerInterest = db.buyerInterest;
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 require("dotenv").config();
 const { getProfileDetails } = require('../helper/profile.helper.js');
+const { Op, where } = require('sequelize');
 
 
 exports.generateOtp = async (req, res) => {
@@ -245,19 +247,73 @@ exports.refreshToken = async (req, res) => {
 
 exports.getBuyerlist = async (req, res) => {
   try {    
+    let sellerId = request_sent = request_received = user_type = userId = "";
+    let buyerInterestArr = [];
+    let whereObj = {};
+
     if(req.body !== undefined) {
         page = req.body.page == "" ? 0 : req.body.page;
         pageSize = req.body.page_size == "" || req.body.page_size == undefined ? null : req.body.page_size;    
         sellerId = req.body.seller_id == "" || req.body.seller_id == undefined ? null : req.body.seller_id;    
+        request_sent = req.body.request_sent == "" || req.body.request_sent == undefined ? null : req.body.request_sent;    
+        request_received = req.body.request_received == "" || req.body.request_received == undefined ? null : req.body.request_received;    
+        user_type = req.body.user_type == "" || req.body.user_type == undefined ? null : req.body.user_type;    
     }
-    // sellerId = req.userId;
+    userId = req.userId;
 
     const queryOptions = {      
       order: [['id', 'DESC']],
     };
 
-    queryOptions.where = {status: 1, user_type: "BUYER"};
+    if(request_sent == true) {
+      if(user_type == __buyerType) {
+        const buyerInterest = await BuyerInterest.findAll({
+          attributes: ['seller_id'],
+          where : {user_type : __buyerType, buyer_id : userId}
+        });
+  
+        buyerInterest.map(async (item) => {
+          buyerInterestArr.push(item.toJSON().seller_id);
+        });
+        whereObj.id = {[Op.in] : buyerInterestArr};
+      }else if(user_type == __sellerType) {
+        const buyerInterest = await BuyerInterest.findAll({
+          attributes: ['buyer_id'],
+          where : {user_type : __sellerType, seller_id : userId}
+        });
+  
+        buyerInterest.map(async (item) => {
+          buyerInterestArr.push(item.toJSON().buyer_id);
+        });
+        whereObj.id = {[Op.in] : buyerInterestArr};
+      }
+    }else if(request_received == true) {
+      if(user_type == __buyerType) {
+        const buyerInterest = await BuyerInterest.findAll({
+          attributes: ['seller_id'],
+          where : {user_type : __sellerType, buyer_id : userId}
+        });
+  
+        buyerInterest.map(async (item) => {
+          buyerInterestArr.push(item.toJSON().seller_id);
+        });
+        whereObj.id = {[Op.in] : buyerInterestArr};
+      }else if(user_type == __sellerType) {
+        const buyerInterest = await BuyerInterest.findAll({
+          attributes: ['buyer_id'],
+          where : {user_type : __buyerType, seller_id : userId}
+        });
+  
+        buyerInterest.map(async (item) => {
+          buyerInterestArr.push(item.toJSON().buyer_id);
+        });
+        whereObj.id = {[Op.in] : buyerInterestArr};
+      }
+    }
 
+    whereObj.status = 1
+    queryOptions.where = whereObj;
+    
     if(pageSize != null) {
       queryOptions.limit = pageSize;
       queryOptions.offset = (page) * pageSize;
@@ -288,6 +344,8 @@ exports.getBuyerlist = async (req, res) => {
       details : modifiedBuyerObj
     });
   } catch (err) {
+    console.log(err);
+    return false;
     res.status(500).send({ 
       success: 0, 
       message: err.message 

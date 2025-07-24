@@ -20,6 +20,9 @@ router.delete("/product/additional-image/:id", verifyToken, productController.re
 
 router.post("/preferences/save", verifyToken, userController.savePreference);
 router.post("/interest/save", verifyToken, userController.saveInterest);
+router.post("/interest/update", verifyToken, userController.updateInterest);
+router.post("/request/product/list", verifyToken, userController.requestProductList);
+
 
 router.post("/profile/update", verifyToken, profileController.updateProfile);
 router.get("/profile/view/:id", verifyToken, profileController.viewProfile);
