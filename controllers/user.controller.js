@@ -224,6 +224,7 @@ exports.requestProductList = async (req, res) => {
       const modifiedProductObj = await Promise.all(
         requestedProducts.map(async (item) => {
           const obj = item.toJSON(); // <-- Important!
+          obj.accept = parseInt(obj.accept);
           obj.product_details = await productDetailsByID(obj.product_id, req);
           if (userType == __buyerType) {
             obj.user_details = await getUserDetails(obj.seller_id, req);
