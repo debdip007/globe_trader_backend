@@ -17,10 +17,7 @@ async function productDetailsByID(productId, req) {
   });
 
   if (!products || products.length === 0) {
-      return res.status(500).send({ 
-          success: 0,
-          message: "No Products found." 
-      });
+      return false;
   }else{
       const productObj = products.toJSON();
 
