@@ -49,5 +49,8 @@ db.userPreference = require("./userpreference")(sequelize, Sequelize);
 db.buyerInterest = require("./buyerinterest")(sequelize, Sequelize);
 db.buyerProfile = require("./buyerprofile")(sequelize, Sequelize);
 db.sellerprofile = require("./sellerprofile")(sequelize, Sequelize);
+db.appnotification = require("./appnotification")(sequelize, Sequelize);
+db.cmspage = require("./cmspage")(sequelize, Sequelize);
+db.faq = require("./faq")(sequelize, Sequelize);
 
 module.exports = db;
