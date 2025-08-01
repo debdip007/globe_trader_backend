@@ -3,6 +3,7 @@ const helper = require("../helper/index.js");
 const { Op, where } = require('sequelize');
 const { saveBase64Image, removeImage } = require('../helper/image.helper.js');
 const { getCategoryName } = require('../helper/profile.helper.js');
+const { query } = require("express-validator");
 const Products = db.product;
 const UserPreference = db.userPreference;
 const Categories = db.category;
@@ -13,18 +14,19 @@ require("dotenv").config();
 
 exports.getProducts = async (req, res) => {
   try {
-    let userType = page = pageSize = "";
+    let userType = page = pageSize = param = "";
     let trending = false;  
     let returnObj = {};
     let preferredProductArr = [];
     const productId = req.params.id;
     
     if(req.body !== undefined) {
-        page = req.body.page == "" ? 0 : req.body.page;
+        page = req.body.page == "" || req.body.page == undefined ? 0 : req.body.page;
         pageSize = req.body.page_size == "" || req.body.page_size == undefined ? 20 : req.body.page_size;
         userType = req.body.user_type == "" || req.body.user_type == undefined ? "SELLER" : req.body.user_type;    
         trending = req.body.trending == "" || req.body.trending == undefined ? false : req.body.trending;    
         preferance = req.body.preferance == "" || req.body.preferance == undefined ? 0 : req.body.preferance;    
+        param = req.body.param == "" || req.body.param == undefined ? "" : req.body.param;    
     }
     sellerId = req.userId;
 
@@ -55,6 +57,10 @@ exports.getProducts = async (req, res) => {
 
       queryOptions.where = {id : {[Op.in] : preferredProductArr}};
     }
+    
+    if(param != "") {
+      queryOptions.where = {product_name : {[Op.like] : '%'+param+'%'}};
+    }
 
     if(productId == null || productId == "") {
         const products = await Products.findAll(
@@ -66,8 +72,7 @@ exports.getProducts = async (req, res) => {
                 success: 0,
                 message: "No Products found." 
             });
-        }else{ 
-          
+        }else{           
             const modifiedProductObj = await Promise.all(
               products.map(async (product) => {
                 const obj = product.toJSON(); // <-- Important!
