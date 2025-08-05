@@ -2,6 +2,7 @@ const db = require("../models/index.js");
 const UserPreference = db.userPreference;
 const BuyerInterest = db.buyerInterest;
 require("dotenv").config();
+const { Op, where } = require('sequelize');
 const { productDetailsByID, getUserDetails } = require('../helper/commonHelper.js');
 const { getProfileDetails } = require('../helper/profile.helper.js');
 
@@ -203,7 +204,7 @@ exports.requestProductList = async (req, res) => {
     switch (userType) {
       case __sellerType:
         requestedProducts = await BuyerInterest.findAll({
-          where : {user_type : __buyerType, seller_id : userId, status : 1}
+          where : {user_type : __buyerType, seller_id : userId, status : 1, accept: {[Op.ne]: 2}}
         });
         break;
       case __buyerType:
