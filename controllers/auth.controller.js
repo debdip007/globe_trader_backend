@@ -257,6 +257,7 @@ exports.getBuyerlist = async (req, res) => {
         sellerId = req.body.seller_id == "" || req.body.seller_id == undefined ? null : req.body.seller_id;    
         request_sent = req.body.request_sent == "" || req.body.request_sent == undefined ? null : req.body.request_sent;    
         request_received = req.body.request_received == "" || req.body.request_received == undefined ? null : req.body.request_received;    
+        requested = req.body.requested == "" || req.body.requested == undefined ? null : req.body.requested;    
         user_type = req.body.user_type == "" || req.body.user_type == undefined ? null : req.body.user_type;    
     }
     userId = req.userId;
@@ -265,7 +266,11 @@ exports.getBuyerlist = async (req, res) => {
       order: [['id', 'DESC']],
     };
 
-    if(request_sent == true) {
+    if(sellerId != "") {
+      user_type = __sellerType;
+    }
+
+    if(request_sent == true || requested == 1) {
       if(user_type == __buyerType) {
         const buyerInterest = await BuyerInterest.findAll({
           attributes: ['seller_id'],
