@@ -317,6 +317,9 @@ exports.getBuyerlist = async (req, res) => {
     }
 
     whereObj.status = 1
+    if(sellerId != "") {
+      whereObj.user_type = __buyerType;
+    }
     queryOptions.where = whereObj;
     
     if(pageSize != null) {
