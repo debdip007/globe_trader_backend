@@ -90,9 +90,9 @@ exports.getProducts = async (req, res) => {
                 obj.subCategory_name = subCategoryName;
                 obj.additional_image = additionalImage;
                 
-                if(userType == "BUYER") {
-                  obj.seller = seller;
-                }
+                // if(userType == "BUYER") {
+                obj.seller = seller;
+                // }
 
                 return {
                   ...obj                                  
