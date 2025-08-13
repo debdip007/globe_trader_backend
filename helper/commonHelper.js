@@ -36,9 +36,9 @@ async function productDetailsByID(productId, req) {
       productObj.subCategory_name = subCategoryName;
       productObj.additional_image = additionalImage;
       
-      if(seller.user_type == __buyerType) {
+      // if(seller.user_type == __buyerType) {
         productObj.seller = seller;
-      }
+      // }
       
       return productObj;
   }
