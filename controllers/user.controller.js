@@ -5,6 +5,7 @@ require("dotenv").config();
 const { Op, where } = require('sequelize');
 const { productDetailsByID, getUserDetails } = require('../helper/commonHelper.js');
 const { getProfileDetails } = require('../helper/profile.helper.js');
+const { createNotification, prepareMessage } = require('../helper/notification.helper.js');
 
 exports.savePreference = async (req, res) => {
   try {
@@ -131,6 +132,15 @@ exports.saveInterest = async (req, res) => {
             success: 1, 
             message: "Interest added."      
         });
+
+        if(user_type == __buyerType) {
+          var message = await prepareMessage(userId, "seller_request_receive");
+          await createNotification(user_id, "Request Received", message, "alert");
+        }else if(user_type == __sellerType) {
+          var message = await prepareMessage(userId, "buyer_request_receive");
+          await createNotification(user_id, "Request Received", message, "alert");
+        }       
+        
     // }else{
         // if((preference[0].id !== undefined)) {
         //     const id = preference[0].id;
@@ -176,13 +186,29 @@ exports.updateInterest = async (req, res) => {
     });
     
     if(interestUpdate) {
+      let interestDetails = await BuyerInterest.findOne({
+        where : {id : id}
+      });
+
+      let userDetails = await getUserDetails(userId, req);
+      let userType = userDetails.user_type;
+      
+      if (userType == __sellerType) {
+        var message = await prepareMessage(userId, "buyer_request_approve");
+        await createNotification(interestDetails.buyer_id, "Request Approved", message, "alert");
+      }else if(userType == __buyerType) {
+        var message = await prepareMessage(userId, "seller_request_approve");
+        // await createNotification(interestDetails.seller_id, "Request Approved", message, "alert"); // option not available for buyer
+      }
+
       res.status(200).send({
           success: 1, 
           message: "Interest Updated."      
       });
     }      
   } catch (err) {
-    res.status(500).send({ 
+    console.log(err);
+    res.status(500).send({       
       success: 0, 
       message: err.message 
     });
