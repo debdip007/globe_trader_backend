@@ -2,7 +2,7 @@ const db = require("../models/index.js");
 const helper = require("../helper/index.js");
 const { Op, where } = require('sequelize');
 const { saveBase64Image, removeImage } = require('../helper/image.helper.js');
-const { getCategoryName } = require('../helper/profile.helper.js');
+const { getCategoryName, getProfileDetails } = require('../helper/profile.helper.js');
 const { query } = require("express-validator");
 const Products = db.product;
 const UserPreference = db.userPreference;
@@ -472,8 +472,14 @@ async function getUserDetails (userId, req = null) {
   try {    
     const user = await User.findByPk(userId);
     const obj = user.toJSON(); 
+    let profile_details = await getProfileDetails(user.id, user.user_type);
+
     if(obj.profile_image != null && obj.profile_image != undefined) {
       obj.profile_image = req.protocol  + '://' + req.get('host') + '/images/profile/' +obj.profile_image;
+    }
+
+    if(profile_details) {
+      obj.profile_details = profile_details;
     }
     
     return obj;
