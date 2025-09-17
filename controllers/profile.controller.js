@@ -350,7 +350,10 @@ exports.viewProfile = async (req, res) => {
         created_at: user.createdAt,
         updated_at: user.updatedAt,
         accessToken: token,
-        profile_details : profile_details
+        profile_details : profile_details,
+        first_name : user.first_name,
+        last_name : user.last_name,
+        user_role : user.user_role
       }      
     });
   } catch (err) {
