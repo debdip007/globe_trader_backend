@@ -8,7 +8,7 @@ const jwt = require("jsonwebtoken");
 require("dotenv").config();
 const { getProfileDetails } = require('../helper/profile.helper.js');
 const { Op, where } = require('sequelize');
-
+const { EmailHelper } = require('../helpers/emailHelper');
 
 exports.generateOtp = async (req, res) => {
   try {
@@ -354,6 +354,26 @@ exports.getBuyerlist = async (req, res) => {
   } catch (err) {
     console.log(err);
     return false;
+    res.status(500).send({ 
+      success: 0, 
+      message: err.message 
+    });
+  }
+};
+
+exports.sendTestEmail = async (req, res) => {
+  try {
+    const email = 'debdip666@gmail.com';
+    const html = `<h1>Welcome, Test!</h1><p>Thanks for joining 🚀</p>`;
+
+    const result = await EmailHelper.sendMail(email, 'Welcome to MyApp!', html);
+
+    if (result.success) {
+      res.json({ success: true, message: 'Welcome email sent.' });
+    } else {
+      res.status(500).json({ success: false, error: result.error });
+    }
+  } catch (err) { 
     res.status(500).send({ 
       success: 0, 
       message: err.message 

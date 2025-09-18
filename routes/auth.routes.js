@@ -14,4 +14,6 @@ router.get("/profile", verifyToken, (req, res) => {
   res.status(200).send("User Profile");
 });
 
+router.post("/send-email", authController.sendTestEmail);
+
 module.exports = router;
