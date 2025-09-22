@@ -8,7 +8,7 @@ const jwt = require("jsonwebtoken");
 require("dotenv").config();
 const { getProfileDetails } = require('../helper/profile.helper.js');
 const { Op, where } = require('sequelize');
-const { EmailHelper } = require('../helpers/emailHelper');
+const { EmailHelper } = require('../helper/email.helper.js');
 
 exports.generateOtp = async (req, res) => {
   try {

@@ -25,7 +25,7 @@ async function createNotification (userId, title, message, messageType, req = nu
 }
 
 async function prepareMessage(userId, messageType) {
-    let message = "";
+    let message = companyName = "";
 
     const user = await User.findOne({
         where: {
@@ -33,6 +33,24 @@ async function prepareMessage(userId, messageType) {
         }
     });
     let fullName = user.first_name+' '+user.last_name;
+
+    if(user.user_type == "SELLER") {
+        profileDetails = await SellerProfile.findOne({
+            where: {
+                seller_id : userId
+            }
+        });
+
+        companyName = profileDetails.company_name;
+    }else if(user.user_type == "BUYER") {
+        profileDetails = await BuyerProfile.findOne({
+            where: {
+                seller_id : userId
+            }
+        });
+
+        companyName = profileDetails.company_name;
+    }
 
     switch (messageType) {
         case "seller_request_receive":
@@ -50,7 +68,7 @@ async function prepareMessage(userId, messageType) {
         default:
             break;
     }
-    message = message.replace("{user_name}", fullName);
+    message = message.replace("{user_name}", companyName);
 
     return message;
 }

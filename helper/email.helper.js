@@ -6,8 +6,8 @@ const transporter = nodemailer.createTransport({
   port: 587,
   secure: false, // true if you use port 465
   auth: {
-    user: 'debdip.mukherjee007@gmail.com',
-    pass: 'aHzt6PCbDw7jWJ3p'
+    user: process.env.SMTP_USER,
+    pass: process.env.SMTP_PASS
   }
 });
 
@@ -23,7 +23,7 @@ const EmailHelper = {
   async sendMail(to, subject, html, text = '', attachments = []) {
     try {
       const info = await transporter.sendMail({
-        from: '"My App" <your-brevo-email@example.com>',
+        from: '"Globe Trader" <debdip.mukherjee007@gmail.com>', // sender address
         to,
         subject,
         text,
