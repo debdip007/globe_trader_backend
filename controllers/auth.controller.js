@@ -22,6 +22,18 @@ exports.generateOtp = async (req, res) => {
     now.setSeconds(now.getMinutes() + timeDiff);
     const timestamp = now.getTime();
 
+    const otpTemplatePath = path.join(__dirname, "../email-template/otp-template.html");
+    const otpTemplateSource = fs.readFileSync(otpTemplatePath, "utf8");
+    const template = handlebars.compile(otpTemplateSource);
+
+    const htmlContent = template({        
+      otp: otp,
+      expiry_minutes: timeDiff,
+      company_name: "Globe Trader",
+      support_email: "info@globetrader.com",
+      logo_url: "http://65.109.225.193:4200/assets/brand/GlobeTrader_Logo_White.png"
+    });
+
     const checkUser = await User.findOne({
       where: {
         email: req.body.email
@@ -49,21 +61,16 @@ exports.generateOtp = async (req, res) => {
         otp,
         timestamp : timestamp
       }, { where: { email: req.body.email } });   
+
+      const sendOtpEmail = await EmailHelper.sendMail(email, 'Hello User, your OTP is '+otp+'. It will expire in '+timeDiff+' minutes.', htmlContent);
       
-      return res.status(200).send({ success: 1, message: "An OTP has been successfully sent to your email." });
+      if(sendOtpEmail) {
+        return res.status(200).send({ success: 1, message: "An OTP has been successfully sent to your email." });
+      }else{
+        return res.status(500).send({success: 0, message: 'Error Sending the OTP email.'});
+      }
+      // return res.status(200).send({ success: 1, message: "An OTP has been successfully sent to your email." });
     } else {
-      const otpTemplatePath = path.join(__dirname, "../email-template/otp-template.html");
-      const otpTemplateSource = fs.readFileSync(otpTemplatePath, "utf8");
-      const template = handlebars.compile(otpTemplateSource);
-
-      const htmlContent = template({        
-        otp: otp,
-        expiry_minutes: timeDiff,
-        company_name: "Globe Trader",
-        support_email: "info@globetrader.com",
-        logo_url: "http://65.109.225.193:4200/assets/brand/GlobeTrader_Logo_White.png"
-      });
-
       // OTP does not exist
       const generateotp = await RegisterOTP.create({       
         email,
