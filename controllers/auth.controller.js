@@ -73,7 +73,7 @@ exports.generateOtp = async (req, res) => {
         timestamp : timestamp
       });
       
-      const sendOtpEmail = await EmailHelper.sendMail(email, 'Hello User, your OTP is ${otp}. It will expire in ${timeDiff} minutes.', htmlContent);
+      const sendOtpEmail = await EmailHelper.sendMail(email, 'Hello User, your OTP is '+otp+'. It will expire in '+timeDiff+' minutes.', htmlContent);
 
       if(sendOtpEmail) {
         return res.status(200).send({ success: 1, message: "An OTP has been successfully sent to your email." });
