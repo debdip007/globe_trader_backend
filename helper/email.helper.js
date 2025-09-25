@@ -23,7 +23,7 @@ const EmailHelper = {
   async sendMail(to, subject, html, text = '', attachments = []) {
     try {
       const info = await transporter.sendMail({
-        from: '"Globe Trader" <debdip.mukherjee007@gmail.com>', // sender address
+        from: '"Globe Trader" <Info@quantamo.com>', // sender address
         to,
         subject,
         text,

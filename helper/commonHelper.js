@@ -5,7 +5,7 @@ const AdditionalImage = db.additionalImage;
 const User = db.user;
 
 const generateEmailOTP = () => {
-  return 1234;
+  // return 1234;
   return Math.floor(Math.random() * 9000) + 1000;
 };
 

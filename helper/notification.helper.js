@@ -2,6 +2,7 @@ const db = require("../models/index.js");
 const Appnotification = db.appnotification;
 const User = db.user;
 const moment = require('moment-timezone');
+const { getProfileDetails } = require('../helper/profile.helper.js');
 
 async function createNotification (userId, title, message, messageType, req = null) {
   try { 
@@ -25,7 +26,7 @@ async function createNotification (userId, title, message, messageType, req = nu
 }
 
 async function prepareMessage(userId, messageType) {
-    let message = "";
+    let message = requestName ="";
 
     const user = await User.findOne({
         where: {
@@ -34,6 +35,14 @@ async function prepareMessage(userId, messageType) {
     });
     let fullName = user.first_name+' '+user.last_name;
 
+    profile_details = await getProfileDetails(user.id, user.user_type);
+    
+    if(profile_details != null) {
+        requestName = profile_details.company_name;
+    }else{
+        requestName = fullName;
+    }
+    
     switch (messageType) {
         case "seller_request_receive":
             message = "You have a new contact request from {user_name}";
@@ -50,7 +59,7 @@ async function prepareMessage(userId, messageType) {
         default:
             break;
     }
-    message = message.replace("{user_name}", fullName);
+    message = message.replace("{user_name}", requestName);
 
     return message;
 }

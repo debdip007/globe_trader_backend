@@ -9,6 +9,9 @@ require("dotenv").config();
 const { getProfileDetails } = require('../helper/profile.helper.js');
 const { Op, where } = require('sequelize');
 const { EmailHelper } = require('../helper/email.helper.js');
+const fs = require("fs");
+const path = require("path");
+const handlebars = require("handlebars");
 
 exports.generateOtp = async (req, res) => {
   try {
@@ -49,6 +52,18 @@ exports.generateOtp = async (req, res) => {
       
       return res.status(200).send({ success: 1, message: "An OTP has been successfully sent to your email." });
     } else {
+      const otpTemplatePath = path.join(__dirname, "../email-template/otp-template.html");
+      const otpTemplateSource = fs.readFileSync(otpTemplatePath, "utf8");
+      const template = handlebars.compile(otpTemplateSource);
+
+      const htmlContent = template({        
+        otp: otp,
+        expiry_minutes: timeDiff,
+        company_name: "Globe Trader",
+        support_email: "info@globetrader.com",
+        logo_url: "http://65.109.225.193:4200/assets/brand/GlobeTrader_Logo_White.png"
+      });
+
       // OTP does not exist
       const generateotp = await RegisterOTP.create({       
         email,
@@ -57,10 +72,15 @@ exports.generateOtp = async (req, res) => {
         otp,
         timestamp : timestamp
       });
+      
+      const sendOtpEmail = await EmailHelper.sendMail(email, 'Hello User, your OTP is ${otp}. It will expire in ${timeDiff} minutes.', htmlContent);
 
-      return res.status(200).send({ success: 1, message: "An OTP has been successfully sent to your email." });
-    }
-    
+      if(sendOtpEmail) {
+        return res.status(200).send({ success: 1, message: "An OTP has been successfully sent to your email." });
+      }else{
+        return res.status(500).send({success: 0, message: 'Error Sending the OTP email.'});
+      }      
+    }    
   } catch (error) {
     res.status(500).send({ success: 0, message: 'Error creating new OTP:', error });
     console.error('Error inserting new user:', error);    
