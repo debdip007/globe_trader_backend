@@ -11,6 +11,11 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
+      this.belongsToMany(models.Role, {
+        through: models.UserRole,
+        foreignKey: 'user_id',
+        otherKey: 'role_id'
+      });
     }
   }
   User.init({
@@ -29,7 +34,9 @@ module.exports = (sequelize, DataTypes) => {
     profile_image: DataTypes.TEXT,
     first_name: DataTypes.TEXT,
     last_name: DataTypes.TEXT,
-    user_role: DataTypes.TEXT
+    user_role: DataTypes.TEXT,
+    reset_password_token: DataTypes.TEXT,
+    reset_password_expires: DataTypes.DATE
   }, {
     sequelize,
     modelName: 'User',

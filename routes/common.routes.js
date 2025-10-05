@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const categoryController = require("../controllers/category.controller");
 const commonController = require("../controllers/common.controller");
-const verifyToken = require("../middlewares/auth.middleware");
+const {verifyToken, authorizeRoles } = require("../middlewares/auth.middleware");
 
 router.get("/category", verifyToken, categoryController.getCategory);
 router.get("/sub-category/:id", verifyToken, categoryController.getSubCategory);

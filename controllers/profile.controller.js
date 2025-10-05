@@ -1,7 +1,7 @@
 const db = require("../models/index.js");
 const SellerProfile = db.sellerprofile;
 const BuyerProfile = db.buyerProfile;
-const User = db.user;
+const User = db.User;
 const jwt = require("jsonwebtoken");
 const { saveBase64Image } = require('../helper/image.helper.js');
 const { getProfileDetails } = require('../helper/profile.helper.js');

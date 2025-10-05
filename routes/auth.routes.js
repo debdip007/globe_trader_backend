@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const authController = require("../controllers/auth.controller");
-const verifyToken = require("../middlewares/auth.middleware");
+const { verifyToken, authorizeRoles } = require("../middlewares/auth.middleware");
 const { otpValidationRules, registerValidationRules, loginValidationRules } = require('../validators/userValidator');
 const validate = require('../middlewares/validate');
 
@@ -10,10 +10,15 @@ router.post("/register", registerValidationRules, validate, authController.regis
 router.post("/login", loginValidationRules, validate, authController.login);
 router.post("/get-token", authController.refreshToken);
 
-router.get("/profile", verifyToken, (req, res) => {
+router.post("/forgot-password", authController.forgotPassword);
+router.get("/reset-password/:token", authController.verifyResetToken);
+router.post("/reset-password", authController.resetPassword);
+
+router.get("/profile", verifyToken, authorizeRoles('admin'), (req, res) => {
   res.status(200).send("User Profile");
 });
 
 router.post("/send-email", authController.sendTestEmail);
+router.get("/test-function", authController.testFunction);
 
 module.exports = router;

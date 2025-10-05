@@ -1,8 +1,10 @@
 const db = require("../models/index.js");
 const helper = require("../helper/index.js");
-const User = db.user;
+const User = db.User;
 const RegisterOTP = db.registerotp;
 const BuyerInterest = db.buyerInterest;
+const Role = db.Role;
+const crypto = require('crypto');
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 require("dotenv").config();
@@ -26,12 +28,13 @@ exports.generateOtp = async (req, res) => {
     const otpTemplateSource = fs.readFileSync(otpTemplatePath, "utf8");
     const template = handlebars.compile(otpTemplateSource);
 
-    const htmlContent = template({        
+    const htmlContent = template({
+      name: "User",        
       otp: otp,
-      expiry_minutes: timeDiff,
+      expiry_minutes: "10",
       company_name: "Globe Trader",
       support_email: "info@globetrader.com",
-      logo_url: "http://65.109.225.193:4200/assets/brand/GlobeTrader_Logo_White.png"
+      logo_url: `${process.env.FRONTEND_URL}/assets/brand/GlobeTrader_Logo_White.png`
     });
 
     const checkUser = await User.findOne({
@@ -62,7 +65,7 @@ exports.generateOtp = async (req, res) => {
         timestamp : timestamp
       }, { where: { email: req.body.email } });   
 
-      const sendOtpEmail = await EmailHelper.sendMail(email, 'Hello User, your OTP is '+otp+'. It will expire in '+timeDiff+' minutes.', htmlContent);
+      const sendOtpEmail = await EmailHelper.sendMail(email, 'Hello User, your OTP is '+otp+'. It will expire in 10 minutes.', htmlContent);
       
       if(sendOtpEmail) {
         return res.status(200).send({ success: 1, message: "An OTP has been successfully sent to your email." });
@@ -128,6 +131,13 @@ exports.register = async (req, res) => {
         last_name,
         user_role 
       });
+
+      const defaultRole = await Role.findOne({ where: { name: user_type } });
+
+      if (user && defaultRole) {
+        await user.addRole(defaultRole);
+      }
+      
 
       res.status(200).send({ success: 1, message: "User registered successfully!" });
     }else{
@@ -388,6 +398,94 @@ exports.getBuyerlist = async (req, res) => {
   }
 };
 
+exports.forgotPassword = async (req, res) => {
+  const { email } = req.body;
+  try {
+    const user = await User.findOne({ where: { email : email } });
+    
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    // Create token
+    const resetToken = crypto.randomBytes(32).toString('hex');
+    const resetTokenHash = crypto.createHash('sha256').update(resetToken).digest('hex');
+    user.reset_password_token = resetTokenHash;
+    user.reset_password_expires = Date.now() + 60 * 60 * 1000; // 1 Hour
+    await user.save();
+    
+
+    // Prepare reset link
+    const resetLink = `${process.env.FRONTEND_URL}/api/auth/reset-password/${resetToken}`;
+    console.log(resetLink);
+
+    const fpTemplatePath = path.join(__dirname, "../email-template/forget-password-template.html");
+    const fpTemplateSource = fs.readFileSync(fpTemplatePath, "utf8");
+    const template = handlebars.compile(fpTemplateSource);
+
+    const htmlContent = template({ 
+      name: "User",       
+      reset_link: resetLink,
+      expiry_hours: "1",
+      company_name: "Globe Trader",
+      support_email: "info@globetrader.com",
+      logo_url: `${process.env.FRONTEND_URL}/assets/brand/GlobeTrader_Logo_White.png`
+    });
+
+    const sendFPEmail = await EmailHelper.sendMail(email, 'Password Reset Request', htmlContent);
+
+    if (sendFPEmail.success) {
+      res.json({ success: true, message: 'Password reset link sent to email' });
+    } else {
+      res.status(500).json({ success: false, error: sendFPEmail.error });
+    }
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+exports.verifyResetToken = async (req, res) => {
+  const { token } = req.params;
+  try {
+    const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
+    const user = await User.findOne({
+      where: {
+        reset_password_token: tokenHash,
+        reset_password_expires: { [require('sequelize').Op.gt]: Date.now() }
+      }
+    });
+
+    if (!user) return res.status(400).json({ message: 'Invalid or expired token' });
+    res.json({ message: 'Valid token' });
+  } catch (err) {
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+exports.resetPassword = async (req, res) => {
+  const { token, new_password } = req.body;
+  try {
+    const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
+    const user = await User.findOne({
+      where: {
+        reset_password_token: tokenHash,
+        reset_password_expires: { [require('sequelize').Op.gt]: Date.now() }
+      }
+    });
+
+    if (!user) return res.status(400).json({ message: 'Invalid or expired token' });
+
+    user.password = await bcrypt.hash(new_password, 10);
+    user.reset_password_token = null;
+    user.reset_password_expires = null;
+    await user.save();
+
+    res.json({ message: 'Password reset successful' });
+  } catch (err) {
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
 exports.sendTestEmail = async (req, res) => {
   try {
     const email = 'debdip666@gmail.com';
@@ -407,3 +505,29 @@ exports.sendTestEmail = async (req, res) => {
     });
   }
 };
+
+exports.testFunction = async (req, res) => {
+  try {
+    const user = await User.findByPk(5);
+    // console.log(getUserDetails(2));
+    // return false;
+
+    // const defaultRole = await Role.findOne({ where: { name: 'buyer' } });
+    
+    const roles = await user.getRoles();
+    
+    res.status(200).send({ 
+      success: 1, 
+      roles: roles 
+    });
+
+    console.log(roles);
+
+  } catch (err) { 
+    res.status(500).send({ 
+      success: 0, 
+      message: err.message 
+    });
+  }
+};
+

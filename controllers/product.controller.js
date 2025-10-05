@@ -8,7 +8,7 @@ const Products = db.product;
 const UserPreference = db.userPreference;
 const Categories = db.category;
 const AdditionalImage = db.additionalImage;
-const User = db.user;
+const User = db.User;
 require("dotenv").config();
 
 

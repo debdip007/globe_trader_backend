@@ -1,6 +1,6 @@
 const db = require("../models/index.js");
 const helper = require("../helper/index.js");
-const User = db.user;
+const User = db.User;
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const CMS = db.cmspage;

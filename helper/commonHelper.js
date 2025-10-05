@@ -2,7 +2,7 @@ const db = require("../models/index.js");
 const { getCategoryName } = require('../helper/profile.helper.js');
 const Products = db.product;
 const AdditionalImage = db.additionalImage;
-const User = db.user;
+const User = db.User;
 
 const generateEmailOTP = () => {
   // return 1234;

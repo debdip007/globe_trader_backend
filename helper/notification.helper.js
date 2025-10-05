@@ -1,6 +1,6 @@
 const db = require("../models/index.js");
 const Appnotification = db.appnotification;
-const User = db.user;
+const User = db.User;
 const moment = require('moment-timezone');
 const { getProfileDetails } = require('../helper/profile.helper.js');
 

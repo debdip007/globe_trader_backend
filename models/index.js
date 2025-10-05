@@ -40,7 +40,7 @@ Object.keys(db).forEach(modelName => {
 db.sequelize = sequelize;
 db.Sequelize = Sequelize;
 
-db.user = require("./user")(sequelize, Sequelize);
+// db.user = require("./user")(sequelize, Sequelize);
 db.registerotp = require("./registerotp")(sequelize, Sequelize);
 db.category = require("./category")(sequelize, Sequelize);
 db.product = require("./product")(sequelize, Sequelize);
@@ -52,5 +52,9 @@ db.sellerprofile = require("./sellerprofile")(sequelize, Sequelize);
 db.appnotification = require("./appnotification")(sequelize, Sequelize);
 db.cmspage = require("./cmspage")(sequelize, Sequelize);
 db.faq = require("./faq")(sequelize, Sequelize);
+// db.role = require("./role")(sequelize, Sequelize);
+// db.permission = require("./permission")(sequelize, Sequelize);
+// db.userrole = require("./userrole")(sequelize, Sequelize);
+// db.rolepermission = require("./rolepermission")(sequelize, Sequelize);
 
 module.exports = db;
