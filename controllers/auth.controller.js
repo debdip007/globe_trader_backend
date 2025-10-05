@@ -403,7 +403,7 @@ exports.forgotPassword = async (req, res) => {
   try {
     const user = await User.findOne({ where: { email : email } });
     
-    if (!user) return res.status(404).json({ message: 'User not found' });
+    if (!user) return res.status(500).json({ success: 0, message: 'User Not Found.' });
 
     // Create token
     const resetToken = crypto.randomBytes(32).toString('hex');
@@ -415,8 +415,7 @@ exports.forgotPassword = async (req, res) => {
 
     // Prepare reset link
     const resetLink = `${process.env.FRONTEND_URL}/api/auth/reset-password/${resetToken}`;
-    console.log(resetLink);
-
+  
     const fpTemplatePath = path.join(__dirname, "../email-template/forget-password-template.html");
     const fpTemplateSource = fs.readFileSync(fpTemplatePath, "utf8");
     const template = handlebars.compile(fpTemplateSource);
