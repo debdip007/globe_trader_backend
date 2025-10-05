@@ -432,7 +432,7 @@ exports.forgotPassword = async (req, res) => {
     const sendFPEmail = await EmailHelper.sendMail(email, 'Password Reset Request', htmlContent);
 
     if (sendFPEmail.success) {
-      res.json({ success: true, message: 'Password reset link sent to email' });
+      res.json({ success: 1, message: 'Password reset link sent to email' });
     } else {
       res.status(500).json({ success: false, error: sendFPEmail.error });
     }
@@ -454,8 +454,8 @@ exports.verifyResetToken = async (req, res) => {
       }
     });
 
-    if (!user) return res.status(400).json({ message: 'Invalid or expired token' });
-    res.json({ message: 'Valid token' });
+    if (!user) return res.status(500).json({ success: false, message: 'Invalid or expired token' });
+    res.json({ success: true, message: 'Valid token' });
   } catch (err) {
     res.status(500).json({ message: 'Server error' });
   }
