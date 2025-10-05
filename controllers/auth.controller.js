@@ -472,14 +472,14 @@ exports.resetPassword = async (req, res) => {
       }
     });
 
-    if (!user) return res.status(400).json({ message: 'Invalid or expired token' });
+    if (!user) return res.status(500).json({success: false, message: 'Invalid or expired token' });
 
     user.password = await bcrypt.hash(new_password, 10);
     user.reset_password_token = null;
     user.reset_password_expires = null;
     await user.save();
 
-    res.json({ message: 'Password reset successful' });
+    res.json({ success: true, message: 'Password reset successful' });
   } catch (err) {
     res.status(500).json({ message: 'Server error' });
   }
