@@ -4,6 +4,7 @@ const User = db.User;
 const RegisterOTP = db.registerotp;
 const BuyerInterest = db.buyerInterest;
 const Role = db.Role;
+const Permission = db.Permission;
 const crypto = require('crypto');
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
@@ -166,7 +167,11 @@ exports.login = async (req, res) => {
     const user = await User.findOne({
       where: {
         email: req.body.email
-      }
+      },
+      include: [{
+        model: Role,
+        include: [ Permission ]  // nested include
+      }]
     });
 
     if (!user) {
@@ -189,7 +194,25 @@ exports.login = async (req, res) => {
       });
     }
 
-    const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, {
+    const permissions = new Set();
+    user.Roles.forEach(role => {
+      role.Permissions.forEach(p => permissions.add(p.name));
+    });
+
+    /*if(user.user_type == __adminType || user.user_type == __superAdminType) { */
+      jwtpayload = {
+        id: user.id,
+        name: user.first_name,
+        permissions: Array.from(permissions),
+      };
+    /*}else{
+      jwtpayload = {
+        id: user.id
+      };
+    }*/
+    
+
+    const token = jwt.sign(jwtpayload, process.env.JWT_SECRET, {
       expiresIn: 3600 // 1 hours
     });
 
@@ -234,7 +257,11 @@ exports.refreshToken = async (req, res) => {
     const user = await User.findOne({
       where: {
         email: req.body.email
-      }
+      },
+      include: [{
+        model: Role,
+        include: [ Permission ]  // nested include
+      }]
     });
 
     if (!user) {
@@ -244,7 +271,24 @@ exports.refreshToken = async (req, res) => {
       });
     }
 
-    const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, {
+    const permissions = new Set();
+    user.Roles.forEach(role => {
+      role.Permissions.forEach(p => permissions.add(p.name));
+    });
+
+    /*if(user.user_type == __adminType || user.user_type == __superAdminType) {*/
+      jwtpayload = {
+        id: user.id,
+        name: user.first_name,
+        permissions: Array.from(permissions),
+      };
+    /*}else{
+      jwtpayload = {
+        id: user.id
+      };
+    }*/
+
+    const token = jwt.sign(jwtpayload, process.env.JWT_SECRET, {
       expiresIn: 3600 // 1 hours
     });
 

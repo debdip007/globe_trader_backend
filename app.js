@@ -9,6 +9,8 @@ require("dotenv").config();
 global.__basedir = __dirname;
 global.__sellerType = "SELLER";
 global.__buyerType = "BUYER";
+global.__adminType = "ADMIN";
+global.__superAdminType = "SUPER_ADMIN";
 
 const db = require("./models/index.js");
 
