@@ -9,7 +9,7 @@ module.exports = (sequelize, DataTypes) => {
       primaryKey: true
     }
   }, {
-    tableName: 'userroles',
+    tableName: 'UserRoles',
     timestamps: true
   });
 
