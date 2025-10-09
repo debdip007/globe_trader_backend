@@ -13,11 +13,11 @@ exports.getUserList = async (req, res) => {
 
         page = limit == "" ? 0 : limit;
         pageSize = offset == "" || offset == undefined ? null : offset;    
+        let whereObj = {};
 
         const queryOptions = {      
             order: [['id', 'DESC']],
         };
-
         
         whereObj.user_type = user_type;
         
