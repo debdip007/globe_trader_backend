@@ -21,6 +21,7 @@ app.use(express.urlencoded({ extended: true }));
 const authRoutes = require("./routes/auth.routes");
 const userRoutes = require("./routes/user.routes");
 const commonRoutes = require("./routes/common.routes");
+const backendRoutes = require("./routes/backend.routes");
 
 app.get('/', (req, res) => res.send('Welcome to GlobeTrader API server'));
 app.use('/images', express.static(path.join(__dirname, 'media', 'uploads')));
@@ -28,6 +29,7 @@ app.use('/images', express.static(path.join(__dirname, 'media', 'uploads')));
 app.use("/api/auth", authRoutes);
 app.use("/api/user", userRoutes);
 app.use("/api/common", commonRoutes);
+app.use("/api/backend", backendRoutes);
 
 // db.sequelize.sync({force:true}).then(() => { // to update the existing table with new column changes 
 db.sequelize.sync().then(() => {
