@@ -38,12 +38,12 @@ exports.getUserList = async (req, res) => {
                 message: "No user found."
             });            
         }else{
-            let obj = userList.toJSON();
+            // let obj = userList.toJSON();
 
             res.status(200).send({
                 success: 1, 
                 message: "User list found.",
-                details: obj     
+                details: userList     
             });
         }
     } catch (err) { 
