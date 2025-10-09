@@ -9,10 +9,10 @@ require("dotenv").config();
 
 exports.getUserList = async (req, res) => {
     try {        
-        const { user_type, page, pageSize } = req.body;
+        const { user_type, limit, offset } = req.body;
 
-        page = page == "" ? 0 : page;
-        pageSize = page_size == "" || page_size == undefined ? null : page_size;    
+        page = limit == "" ? 0 : limit;
+        pageSize = offset == "" || offset == undefined ? null : offset;    
 
         const queryOptions = {      
             order: [['id', 'DESC']],
