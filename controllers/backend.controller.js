@@ -55,19 +55,28 @@ exports.getUserList = async (req, res) => {
     }  
 };
 
-async function getFaqContent () {
-  try {    
-    const faq = await FAQ.findAll({
-      where : {
-        "status" : 1
-      },
-      order: [['sort_order', 'DESC']]
-    });
+exports.getProductList = async (req, res) => {
+    try {        
+        const { status, limit, offset } = req.body;
 
-    if(faq && faq.length > 0) {
-        return faq;
-    }    
-  } catch (error) {
-    console.error('Error getting FAQ details:', error);
-  }    
+        page = limit == "" ? 0 : limit;
+        pageSize = offset == "" || offset == undefined ? null : offset;    
+        let whereObj = {};
+
+        const queryOptions = {      
+            order: [['id', 'DESC']],
+        };
+
+        queryOptions.where = { status : status};
+
+        const products = await Products.findAll(
+            queryOptions         
+        );
+    } catch (err) { 
+      console.log(err);   
+      res.status(500).send({ 
+        success: 0, 
+        message: err.message 
+      });
+    }
 }
