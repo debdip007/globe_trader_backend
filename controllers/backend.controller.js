@@ -3,6 +3,7 @@ const helper = require("../helper/index.js");
 const User = db.User;
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const product = require("../models/product.js");
 const CMS = db.cmspage;
 const FAQ = db.faq;
 require("dotenv").config();
@@ -69,9 +70,25 @@ exports.getProductList = async (req, res) => {
 
         queryOptions.where = { status : status};
 
-        const products = await Products.findAll(
+        const products = await product.findAll(
             queryOptions         
         );
+
+        if(!products || products.length === 0) {
+            res.status(500).send({ 
+                success: 0, 
+                message: "No product found."
+            });            
+        }else{
+            // let obj = userList.toJSON();
+
+            res.status(200).send({
+                success: 1, 
+                message: "Product list found.",
+                details: products     
+            });
+        }
+
     } catch (err) { 
       console.log(err);   
       res.status(500).send({ 
