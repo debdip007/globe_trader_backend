@@ -4,8 +4,7 @@ const User = db.User;
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const product = require("../models/product.js");
-const CMS = db.cmspage;
-const FAQ = db.faq;
+const Products = db.product;
 require("dotenv").config();
 
 exports.getUserList = async (req, res) => {
@@ -70,7 +69,7 @@ exports.getProductList = async (req, res) => {
 
         queryOptions.where = { status : status};
 
-        const products = await product.findAll(
+        const products = await Products.findAll(
             queryOptions         
         );
 
