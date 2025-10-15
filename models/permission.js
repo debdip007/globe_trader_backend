@@ -20,7 +20,11 @@ module.exports = (sequelize, DataTypes) => {
   }
   Permission.init({
     name: DataTypes.STRING,
-    description: DataTypes.STRING
+    description: DataTypes.STRING,
+    sort: {
+      type: DataTypes.INTEGER,
+      defaultValue: 0
+    }
   }, {
     sequelize,
     modelName: 'Permission',
