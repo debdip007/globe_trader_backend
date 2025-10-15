@@ -2,6 +2,7 @@ const db = require("../models/index.js");
 const helper = require("../helper/index.js");
 const User = db.User;
 const Role = db.Role;
+const Permission = db.Permission;
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const product = require("../models/product.js");
@@ -103,11 +104,20 @@ exports.getRoleList = async (req, res) => {
         let whereObj = {};
 
         const queryOptions = {      
-            order: [['id', 'DESC']],
+            order: [['id', 'ASC']],
         };
 
         const roles = await Role.findAll(
-            queryOptions         
+            {
+                include: [
+                    {
+                        model: Permission,
+                        as: 'permissions',
+                        attributes: ['id', 'name', 'description'], // optional
+                        through: { attributes: [] } // hide junction table
+                    }
+                ]
+            }         
         );
 
         if(!roles || roles.length === 0) {
