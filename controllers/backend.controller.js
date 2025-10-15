@@ -111,8 +111,7 @@ exports.getRoleList = async (req, res) => {
             {
                 include: [
                     {
-                        model: Permission,
-                        as: 'permissions',
+                        model: Permission,                        
                         attributes: ['id', 'name', 'description'], // optional
                         through: { attributes: [] } // hide junction table
                     }
