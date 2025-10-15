@@ -328,7 +328,7 @@ exports.refreshToken = async (req, res) => {
 
 exports.getBuyerlist = async (req, res) => {
   try {    
-    let sellerId = request_sent = request_received = user_type = userId = "";
+    let sellerId = request_sent = request_received = user_type = userId = approveStatus = "";
     let buyerInterestArr = [];
     let whereObj = {};
 
@@ -340,6 +340,7 @@ exports.getBuyerlist = async (req, res) => {
         request_received = req.body.request_received == "" || req.body.request_received == undefined ? null : req.body.request_received;    
         requested = req.body.requested == "" || req.body.requested == undefined ? null : req.body.requested;    
         user_type = req.body.user_type == "" || req.body.user_type == undefined ? null : req.body.user_type;    
+        approveStatus = req.body.status == "" || req.body.status == undefined ? 0 : req.body.status;    
     }
     userId = req.userId;
 
@@ -355,7 +356,7 @@ exports.getBuyerlist = async (req, res) => {
       if(user_type == __buyerType) {
         const buyerInterest = await BuyerInterest.findAll({
           attributes: ['seller_id'],
-          where : {user_type : __buyerType, buyer_id : userId}
+          where : {user_type : __buyerType, buyer_id : userId, accept: approveStatus}
         });
   
         buyerInterest.map(async (item) => {
@@ -365,7 +366,7 @@ exports.getBuyerlist = async (req, res) => {
       }else if(user_type == __sellerType) {
         const buyerInterest = await BuyerInterest.findAll({
           attributes: ['buyer_id'],
-          where : {user_type : __sellerType, seller_id : userId}
+          where : {user_type : __sellerType, seller_id : userId, accept: approveStatus}
         });
   
         buyerInterest.map(async (item) => {

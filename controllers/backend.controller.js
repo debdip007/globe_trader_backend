@@ -142,3 +142,45 @@ exports.getRoleList = async (req, res) => {
       });
     }
 }
+
+exports.modifyCategory = async (req, res) => {
+    try {        
+        const { name, parent_id, status } = req.body;
+
+        page = limit == "" ? 0 : limit;
+        pageSize = offset == "" || offset == undefined ? null : offset;    
+        let whereObj = {};
+
+        const queryOptions = {      
+            order: [['id', 'DESC']],
+        };
+
+        queryOptions.where = { status : status};
+
+        const products = await Products.findAll(
+            queryOptions         
+        );
+
+        if(!products || products.length === 0) {
+            res.status(500).send({ 
+                success: 0, 
+                message: "No product found."
+            });            
+        }else{
+            // let obj = userList.toJSON();
+
+            res.status(200).send({
+                success: 1, 
+                message: "Product list found.",
+                details: products     
+            });
+        }
+
+    } catch (err) { 
+      console.log(err);   
+      res.status(500).send({ 
+        success: 0, 
+        message: err.message 
+      });
+    }
+}
