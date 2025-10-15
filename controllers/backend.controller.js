@@ -1,6 +1,7 @@
 const db = require("../models/index.js");
 const helper = require("../helper/index.js");
 const User = db.User;
+const Role = db.Role;
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const product = require("../models/product.js");
@@ -85,6 +86,42 @@ exports.getProductList = async (req, res) => {
                 success: 1, 
                 message: "Product list found.",
                 details: products     
+            });
+        }
+
+    } catch (err) { 
+      console.log(err);   
+      res.status(500).send({ 
+        success: 0, 
+        message: err.message 
+      });
+    }
+}
+
+exports.getRoleList = async (req, res) => {
+    try {    
+        let whereObj = {};
+
+        const queryOptions = {      
+            order: [['id', 'DESC']],
+        };
+
+        const roles = await Role.findAll(
+            queryOptions         
+        );
+
+        if(!roles || roles.length === 0) {
+            res.status(500).send({ 
+                success: 0, 
+                message: "No user role found."
+            });            
+        }else{
+            // let obj = userList.toJSON();
+
+            res.status(200).send({
+                success: 1, 
+                message: "User role list found.",
+                details: roles     
             });
         }
 
