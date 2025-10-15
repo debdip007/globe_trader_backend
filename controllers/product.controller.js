@@ -34,10 +34,12 @@ exports.getProducts = async (req, res) => {
       order: [['id', 'DESC']],
     };
 
-    if (userType == "SELLER") {
+    if (userType == __sellerType) {
       queryOptions.where = {seller_id: sellerId};
-    }else if(userType == "BUYER") {
+    }else if(userType == __buyerType) {
       queryOptions.where = {status: 1};
+    }else if(userType == __adminType || userType == __superAdminType){
+      queryOptions.where = {};
     }
 
     if(trending == false) {
