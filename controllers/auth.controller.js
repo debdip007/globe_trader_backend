@@ -512,7 +512,7 @@ exports.verifyResetToken = async (req, res) => {
 };
 
 exports.resetPassword = async (req, res) => {
-  const { email, otp, newPassword } = req.body;
+  const { email, otp, new_password } = req.body;
   try {
     const user = await User.findOne({ where: { email : email } });
     if (!user) return res.status(500).json({ success: false, message: 'User not found' });
@@ -525,7 +525,7 @@ exports.resetPassword = async (req, res) => {
     if (new Date() > user.reset_password_expires)
       return res.status(400).json({ message: "OTP expired" });
 
-    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    const hashedPassword = await bcrypt.hash(new_password, 10);
     await user.update({
       password: hashedPassword,
       reset_otp: null,
