@@ -482,7 +482,7 @@ exports.forgotPassword = async (req, res) => {
     const sendFPEmail = await EmailHelper.sendMail(email, 'Password Reset Request', htmlContent);
 
     if (sendFPEmail.success) {
-      res.json({ success: 1, message: 'Password reset link sent to email' });
+      res.json({ success: 1, message: 'Password reset OTP sent to email' });
     } else {
       res.status(500).json({ success: false, error: sendFPEmail.error });
     }
