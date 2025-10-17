@@ -7,5 +7,6 @@ const { verifyToken } = require("../middlewares/auth.middleware");
 router.post('/user-list', verifyToken, backendController.getUserList);
 router.post('/product-list', verifyToken, backendController.getProductList);
 router.get('/role-list', verifyToken, backendController.getRoleList);
+router.post('/modify-category', verifyToken, backendController.modifyCategory);
 
 module.exports = router;

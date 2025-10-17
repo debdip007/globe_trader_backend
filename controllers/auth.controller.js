@@ -451,10 +451,14 @@ exports.forgotPassword = async (req, res) => {
     if (!user) return res.status(500).json({ success: 0, message: 'User Not Found.' });
 
     // Create token
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+
     const resetToken = crypto.randomBytes(32).toString('hex');
     const resetTokenHash = crypto.createHash('sha256').update(resetToken).digest('hex');
+    
+    user.reset_otp = otp;
     user.reset_password_token = resetTokenHash;
-    user.reset_password_expires = Date.now() + 60 * 60 * 1000; // 1 Hour
+    user.reset_password_expires = Date.now() + 10 * 60 * 1000; // 10 Min
     await user.save();
     
 
@@ -467,8 +471,9 @@ exports.forgotPassword = async (req, res) => {
 
     const htmlContent = template({ 
       name: "User",       
-      reset_link: resetLink,
-      expiry_hours: "1",
+      // reset_link: resetLink,
+      reset_otp: otp,
+      expiry_minutes: "10",
       company_name: "Globe Trader",
       support_email: "info@globetrader.com",
       logo_url: `${process.env.FRONTEND_URL}/assets/brand/GlobeTrader_Logo_White.png`
@@ -507,24 +512,28 @@ exports.verifyResetToken = async (req, res) => {
 };
 
 exports.resetPassword = async (req, res) => {
-  const { token, new_password } = req.body;
+  const { email, otp, newPassword } = req.body;
   try {
-    const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
-    const user = await User.findOne({
-      where: {
-        reset_password_token: tokenHash,
-        reset_password_expires: { [require('sequelize').Op.gt]: Date.now() }
-      }
+    const user = await User.findOne({ where: { email : email } });
+    if (!user) return res.status(500).json({ success: false, message: 'User not found' });
+
+    // const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
+    if (user.reset_otp !== otp)
+      return res.status(500).json({ message: 'Invalid OTP' });
+
+    // if (!user) return res.status(500).json({success: false, message: 'Invalid or expired token' });
+    if (new Date() > user.reset_password_expires)
+      return res.status(400).json({ message: "OTP expired" });
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    await user.update({
+      password: hashedPassword,
+      reset_otp: null,
+      reset_password_expires: null,
     });
 
-    if (!user) return res.status(500).json({success: false, message: 'Invalid or expired token' });
+    res.status(500).json({ success: true, message: 'Password reset successful' });
 
-    user.password = await bcrypt.hash(new_password, 10);
-    user.reset_password_token = null;
-    user.reset_password_expires = null;
-    await user.save();
-
-    res.json({ success: true, message: 'Password reset successful' });
   } catch (err) {
     res.status(500).json({ message: 'Server error' });
   }

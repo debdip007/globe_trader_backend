@@ -3,6 +3,7 @@ const helper = require("../helper/index.js");
 const User = db.User;
 const Role = db.Role;
 const Permission = db.Permission;
+const Categories = db.category;
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const product = require("../models/product.js");
@@ -147,37 +148,49 @@ exports.getRoleList = async (req, res) => {
 
 exports.modifyCategory = async (req, res) => {
     try {        
-        const { name, parent_id, status } = req.body;
+        const { category_id, name, parent_id, status } = req.body;
 
-        page = limit == "" ? 0 : limit;
-        pageSize = offset == "" || offset == undefined ? null : offset;    
-        let whereObj = {};
-
-        const queryOptions = {      
-            order: [['id', 'DESC']],
-        };
-
-        queryOptions.where = { status : status};
-
-        const products = await Products.findAll(
-            queryOptions         
-        );
-
-        if(!products || products.length === 0) {
-            res.status(500).send({ 
-                success: 0, 
-                message: "No product found."
-            });            
-        }else{
-            // let obj = userList.toJSON();
-
-            res.status(200).send({
-                success: 1, 
-                message: "Product list found.",
-                details: products     
+        if(category_id == "" || category_id == undefined ) {
+            const categoryCreate = await Categories.create({       
+                name : name,
+                parent_id : parent_id,
+                status : status
             });
-        }
 
+            if(categoryCreate) {
+                return res.status(200).send({
+                    success: 1, 
+                    message: "Category created successfully!",
+                });
+            }else{
+                res.status(500).send({ 
+                    success: 0, 
+                    message: "Something went wrong while updating the category" 
+                });
+            }            
+        }else{
+            const categoryUpdate = await Categories.update({
+                name : name,
+                parent_id : parent_id,
+                status : status
+            },
+            {
+                where : {id: category_id}
+            });
+
+            if(categoryUpdate) {
+                return res.status(200).send({
+                    success: 1, 
+                    message: "Category updated successfully!",
+                });
+            }else{
+                res.status(500).send({ 
+                    success: 0, 
+                    message: "Something went wrong while updating the category" 
+                });
+            }
+            
+        }
     } catch (err) { 
       console.log(err);   
       res.status(500).send({ 

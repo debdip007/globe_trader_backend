@@ -36,6 +36,7 @@ module.exports = (sequelize, DataTypes) => {
     last_name: DataTypes.TEXT,
     user_role: DataTypes.TEXT,
     reset_password_token: DataTypes.TEXT,
+    reset_otp: DataTypes.TEXT,
     reset_password_expires: DataTypes.DATE
   }, {
     sequelize,
