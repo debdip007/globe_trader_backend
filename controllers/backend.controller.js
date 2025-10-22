@@ -180,6 +180,40 @@ exports.getPermissionList = async (req, res) => {
     }
 }
 
+exports.getCategoryList = async (req, res) => {
+    try {    
+        let whereObj = {};
+
+        const queryOptions = {      
+            order: [['id', 'ASC']],
+        };
+
+        const categoryList = await Categories.findAll(
+            queryOptions         
+        );
+
+        if(!categoryList || categoryList.length === 0) {
+            res.status(500).send({ 
+                success: 0, 
+                message: "No category found."
+            });            
+        }else{
+            res.status(200).send({
+                success: 1, 
+                message: "Category list found.",
+                details: categoryList     
+            });
+        }
+
+    } catch (err) { 
+      console.log(err);   
+      res.status(500).send({ 
+        success: 0, 
+        message: err.message 
+      });
+    }
+}
+
 exports.modifyCategory = async (req, res) => {
     try {        
         const { category_id, name, parent_id, status } = req.body;
