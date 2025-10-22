@@ -182,11 +182,13 @@ exports.getPermissionList = async (req, res) => {
 
 exports.getCategoryList = async (req, res) => {
     try {    
-        let whereObj = {};
+        let whereObj = {parent_id: null};
 
         const queryOptions = {      
             order: [['id', 'ASC']],
         };
+
+        queryOptions.where = whereObj;
 
         const categoryList = await Categories.findAll(
             queryOptions         
