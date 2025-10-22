@@ -146,6 +146,40 @@ exports.getRoleList = async (req, res) => {
     }
 }
 
+exports.getPermissionList = async (req, res) => {
+    try {    
+        let whereObj = {};
+
+        const queryOptions = {      
+            order: [['id', 'ASC']],
+        };
+
+        const permissionList = await Permission.findAll(
+            queryOptions         
+        );
+
+        if(!permissionList || permissionList.length === 0) {
+            res.status(500).send({ 
+                success: 0, 
+                message: "No permission found."
+            });            
+        }else{
+            res.status(200).send({
+                success: 1, 
+                message: "Permission list found.",
+                details: permissionList     
+            });
+        }
+
+    } catch (err) { 
+      console.log(err);   
+      res.status(500).send({ 
+        success: 0, 
+        message: err.message 
+      });
+    }
+}
+
 exports.modifyCategory = async (req, res) => {
     try {        
         const { category_id, name, parent_id, status } = req.body;
