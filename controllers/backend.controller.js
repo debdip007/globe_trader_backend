@@ -151,7 +151,7 @@ exports.getPermissionList = async (req, res) => {
         let whereObj = {};
 
         const queryOptions = {      
-            order: [['id', 'ASC']],
+            order: [['sort', 'ASC']],
         };
 
         const permissionList = await Permission.findAll(
