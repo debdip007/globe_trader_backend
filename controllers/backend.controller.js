@@ -1,5 +1,6 @@
 const db = require("../models/index.js");
 const helper = require("../helper/index.js");
+const Sequelize = require('sequelize');
 const User = db.User;
 const Role = db.Role;
 const Permission = db.Permission;
@@ -7,6 +8,7 @@ const Categories = db.category;
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const product = require("../models/product.js");
+const BuyerInterest = db.buyerInterest;
 const Products = db.product;
 require("dotenv").config();
 
@@ -263,6 +265,124 @@ exports.modifyCategory = async (req, res) => {
         }
     } catch (err) { 
       console.log(err);   
+      res.status(500).send({ 
+        success: 0, 
+        message: err.message 
+      });
+    }
+}
+
+exports.dashboardDetails = async (req, res) => {
+    try {        
+        // const { date, user_type } = req.body;
+
+        const date = req.body?.date ? req.body.date : null;
+        const user_type = req.body?.user_type ? req.body.user_type : null;  
+        
+        const userList = await User.findAll({
+            attributes: [
+                "user_type",
+                [Sequelize.fn("COUNT", Sequelize.col("id")), "count"]
+            ],
+            group: ["user_type"]         
+        }); 
+
+        const products = await Products.count({
+            where: { status: 1 }
+        });
+
+        const userListByMonth = await User.findAll({
+            attributes: [
+                "user_type",
+                [Sequelize.literal(`DATE_FORMAT(createdAt, '%Y-%m')`), "month"],
+                [Sequelize.fn("COUNT", Sequelize.col("id")), "count"]
+            ],
+            group: [
+                "user_type",
+                Sequelize.literal(`DATE_FORMAT(createdAt, '%Y-%m')`)
+            ],
+            order: [
+                ["user_type", "ASC"],
+                [Sequelize.literal(`DATE_FORMAT(createdAt, '%Y-%m')`), "ASC"]
+            ],
+            raw: true         
+        });  
+        
+        const formattedMonthlyUser = {};
+    
+        userListByMonth.forEach(row => {
+            if (!formattedMonthlyUser[row.user_type]) {
+                formattedMonthlyUser[row.user_type] = [];
+            }
+            formattedMonthlyUser[row.user_type].push({
+                month: row.month,
+                count: Number(row.count)
+            });
+        });
+
+        const requestByMonth = await BuyerInterest.findAll({
+            attributes: [
+                "user_type",
+                [Sequelize.literal(`DATE_FORMAT(createdAt, '%Y-%m')`), "month"],
+                [Sequelize.fn("COUNT", Sequelize.col("id")), "count"]
+            ],
+            group: [
+                "user_type",
+                Sequelize.literal(`DATE_FORMAT(createdAt, '%Y-%m')`)
+            ],
+            order: [
+                ["user_type", "ASC"],
+                [Sequelize.literal(`DATE_FORMAT(createdAt, '%Y-%m')`), "ASC"]
+            ],
+            raw: true         
+        });  
+        
+        const formattedMonthlyRequest = {};
+    
+        requestByMonth.forEach(row => {
+            if (!formattedMonthlyRequest[row.user_type]) {
+                formattedMonthlyRequest[row.user_type] = [];
+            }
+            formattedMonthlyRequest[row.user_type].push({
+                month: row.month,
+                count: Number(row.count)
+            });
+        });
+        
+        const totalRequest = await BuyerInterest.count();
+        const approvedRequest = await BuyerInterest.count({
+            where : {status : 1}
+        });
+
+        const pendingRequest = await BuyerInterest.count({
+            where : {status : 0}
+        });
+
+        const sellerRequest = await BuyerInterest.count({
+            where : {user_type : "SELLER"}
+        });
+
+        const buyerRequest = await BuyerInterest.count({
+            where : {user_type : "BUYER"}
+        });
+
+        return res.status(200).send({
+            success: 1, 
+            message: "Dashboard details found!",
+            details: {
+                user_count : userList,
+                product_count : products,
+                monthly_user_count : formattedMonthlyUser,
+                monthly_request : formattedMonthlyRequest,
+                total_request : totalRequest,
+                approved_request : approvedRequest,
+                pending_request : pendingRequest,
+                seller_request : sellerRequest,
+                buyer_request : buyerRequest
+            }
+        });
+    } catch (err) { 
+        console.log(err);
       res.status(500).send({ 
         success: 0, 
         message: err.message 

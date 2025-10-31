@@ -10,5 +10,6 @@ router.get('/role-list', verifyToken, backendController.getRoleList);
 router.get('/permission-list', verifyToken, backendController.getPermissionList);
 router.get('/category-list', verifyToken, backendController.getCategoryList);
 router.post('/modify-category', verifyToken, backendController.modifyCategory);
+router.post('/dashboard-details', verifyToken, backendController.dashboardDetails);
 
 module.exports = router;
