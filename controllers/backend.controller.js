@@ -389,3 +389,67 @@ exports.dashboardDetails = async (req, res) => {
       });
     }
 }
+
+exports.requestProductListByUserType = async (req, res) => {
+  try {
+    let userType = requestedProducts = "";
+    let returnObj = {};
+    
+    if(req.body !== undefined) {
+        userType = req.body.user_type == "" || req.body.user_type == undefined ? "SELLER" : req.body.user_type;    
+        requested = req.body.requested == "" || req.body.requested == undefined ? 0 : req.body.requested;    
+    }
+
+    switch (userType) {
+      case __sellerType:
+        requestedProducts = await BuyerInterest.findAll({
+          where : {user_type : __buyerType}
+        });
+        break;
+      case __buyerType:
+        requestedProducts = await BuyerInterest.findAll({
+          where : {user_type : userType}
+        });
+        break;    
+      default:
+        break;
+    }
+
+    if (!requestedProducts || requestedProducts.length === 0) {
+        return res.status(500).send({ 
+            success: 0,
+            message: "No Products found." 
+        });
+    }else{           
+      const modifiedProductObj = await Promise.all(
+        requestedProducts.map(async (item) => {
+          const obj = item.toJSON(); // <-- Important!
+          obj.accept = parseInt(obj.accept);
+          obj.product_details = await productDetailsByID(obj.product_id, req);
+          if (userType == __buyerType) {
+            obj.user_details = await getUserDetails(obj.seller_id, req);
+            obj.user_details.profile_details = await getProfileDetails(obj.seller_id, __sellerType);
+          }else if(userType == __sellerType) {
+            obj.user_details = await getUserDetails(obj.buyer_id, req);
+            obj.user_details.profile_details = await getProfileDetails(obj.buyer_id, __buyerType);
+          }
+          return {
+            ...obj                                  
+          };
+        })
+      );
+
+      res.status(200).send({
+          success: 1, 
+          message: "Product list found.",
+          products: modifiedProductObj     
+      });
+    }
+  }catch (err) { 
+    console.log(err);   
+    res.status(500).send({ 
+      success: 0, 
+      message: err.message 
+    });
+  }
+};

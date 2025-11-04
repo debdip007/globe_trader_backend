@@ -11,5 +11,8 @@ router.get('/permission-list', verifyToken, backendController.getPermissionList)
 router.get('/category-list', verifyToken, backendController.getCategoryList);
 router.post('/modify-category', verifyToken, backendController.modifyCategory);
 router.post('/dashboard-details', verifyToken, backendController.dashboardDetails);
+router.post('/request-list', verifyToken, backendController.requestProductListByUserType);
+
+
 
 module.exports = router;
