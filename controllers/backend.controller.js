@@ -11,6 +11,8 @@ const product = require("../models/product.js");
 const BuyerInterest = db.buyerInterest;
 const Products = db.product;
 require("dotenv").config();
+const { getProfileDetails } = require('../helper/profile.helper.js');
+const { productDetailsByID, getUserDetails } = require('../helper/commonHelper.js');
 
 exports.getUserList = async (req, res) => {
     try {        
