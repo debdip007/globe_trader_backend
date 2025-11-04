@@ -410,7 +410,7 @@ exports.requestProductListByUserType = async (req, res) => {
         break;
       case __buyerType:
         requestedProducts = await BuyerInterest.findAll({
-          where : {user_type : userType}
+          where : {user_type : __sellerType}
         });
         break;    
       default:
