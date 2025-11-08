@@ -229,13 +229,25 @@ exports.requestProductList = async (req, res) => {
 
     switch (userType) {
       case __sellerType:
+        if(requested == true) {
+          whereObj = {user_type : __buyerType, seller_id : userId}
+        }else{
+          whereObj = {user_type : userType, seller_id : userId, status : 1, accept: {[Op.ne]: 2}}          
+        }
+
         requestedProducts = await BuyerInterest.findAll({
-          where : {user_type : __buyerType, seller_id : userId, status : 1, accept: {[Op.ne]: 2}}
+          where : whereObj
         });
         break;
       case __buyerType:
+        if(requested == true) {
+          whereObj = {user_type : __sellerType, buyer_id : userId};
+        }else{
+          whereObj = {user_type : userType, buyer_id : userId, status : 1};          
+        }
+        
         requestedProducts = await BuyerInterest.findAll({
-          where : {user_type : userType, buyer_id : userId, status : 1}
+          where : whereObj
         });
         break;    
       default:
