@@ -277,12 +277,21 @@ exports.requestProductList = async (req, res) => {
           };
         })
       );
-
-      res.status(200).send({
+      
+      if(userType == __buyerType && requested == true) {
+        res.status(200).send({
+          success: 1, 
+          message: "Product list found.",
+          user: modifiedProductObj     
+        });
+      }else{
+        res.status(200).send({
           success: 1, 
           message: "Product list found.",
           products: modifiedProductObj     
-      });
+        });
+      }
+      
     }
   }catch (err) { 
     console.log(err);   
