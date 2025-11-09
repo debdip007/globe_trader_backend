@@ -12,6 +12,7 @@ router.get('/category-list', verifyToken, backendController.getCategoryList);
 router.post('/modify-category', verifyToken, backendController.modifyCategory);
 router.post('/dashboard-details', verifyToken, backendController.dashboardDetails);
 router.post('/request-list', verifyToken, backendController.requestProductListByUserType);
+router.post('/user-register', verifyToken, backendController.userRegister);
 
 
 

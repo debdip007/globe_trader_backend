@@ -457,3 +457,55 @@ exports.requestProductListByUserType = async (req, res) => {
     });
   }
 };
+
+exports.userRegister = async (req, res) => {
+  try {
+    const { first_name, last_name, user_role, email, country, phone, status, user_type, platform_type, profile_image } = req.body;
+    
+    const checkUser = await User.findOne({
+      where: {
+        email: req.body.email
+      }
+    });
+    
+    if(checkUser) {
+      return res.status(401).send({ success: 0, message: "User already exists with the email "+req.body.email });
+    }  
+
+    let statusCode = status == "" || status == null ? 1 : status;
+
+    const user = await User.create({
+        fullname, 
+        email,      
+        password: bcrypt.hashSync(password, 8),
+        country: country, //JSON.stringify(country) 
+        country_code: country_code, //JSON.stringify(country_code), 
+        phone,
+        status: statusCode,
+        user_type,
+        is_verified: 1,
+        platform_type,
+        first_name,
+        last_name,
+        user_role 
+    });
+
+    const defaultRole = await Role.findOne({ where: { name: user_type } });
+
+    if (user && defaultRole) {
+        await user.addRole(defaultRole);
+    }
+    
+
+    res.status(200).send({ success: 1, message: "User registered successfully!" });
+    
+  } catch (error) {
+    if (error.name === 'SequelizeUniqueConstraintError') {
+      res.status(500).send({ success: 0, message: "Email already exists." });
+      console.error('Email already exists.');
+    } else {
+      res.status(500).send({ success: 0, message: 'Error inserting new user:', error });
+      console.error('Error inserting new user:', error);
+    }    
+  }
+};
