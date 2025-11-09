@@ -461,7 +461,8 @@ exports.requestProductListByUserType = async (req, res) => {
 exports.userRegister = async (req, res) => {
   try {
     const { first_name, last_name, user_role, email, country, phone, status, user_type, platform_type, profile_image } = req.body;
-    
+    const password = req.body.password || "globetrader@123";
+
     const checkUser = await User.findOne({
       where: {
         email: req.body.email
@@ -475,11 +476,9 @@ exports.userRegister = async (req, res) => {
     let statusCode = status == "" || status == null ? 1 : status;
 
     const user = await User.create({
-        fullname, 
         email,      
         password: bcrypt.hashSync(password, 8),
         country: country, //JSON.stringify(country) 
-        country_code: country_code, //JSON.stringify(country_code), 
         phone,
         status: statusCode,
         user_type,
