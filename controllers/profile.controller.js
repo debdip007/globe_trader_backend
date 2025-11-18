@@ -42,14 +42,14 @@ exports.updateProfile = async (req, res) => {
             last_name,
             user_role,
             business_description,
-            business_country_names 
+            business_country_names,
+            status 
         } = req.body;
 
     const user = await User.findOne({
         where: {
             id : user_id,
-            user_type : user_type,
-            status: 1
+            user_type : user_type
         }
     });
 
@@ -98,7 +98,8 @@ exports.updateProfile = async (req, res) => {
                 device_type : device_type,
                 first_name,
                 last_name,
-                user_role 
+                user_role,
+                status 
             }, 
             {
                 where : {id : user.id}    
@@ -260,8 +261,8 @@ exports.updateProfile = async (req, res) => {
         const updatedUser = await User.findOne({
             where: {
                 id : user_id,
-                user_type : user_type,
-                status: 1
+                user_type : user_type
+                // status: 1
             }
         });
         profile_details = await getProfileDetails(user_id, user_type);
