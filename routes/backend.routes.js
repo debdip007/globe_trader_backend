@@ -6,6 +6,7 @@ const { verifyToken } = require("../middlewares/auth.middleware");
 // Assign role to user
 router.post('/user-list', verifyToken, backendController.getUserList);
 router.post('/product-list', verifyToken, backendController.getProductList);
+router.post('/products', backendController.getAllProducts);
 router.get('/role-list', verifyToken, backendController.getRoleList);
 router.get('/permission-list', verifyToken, backendController.getPermissionList);
 router.get('/category-list', verifyToken, backendController.getCategoryList);
