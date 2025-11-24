@@ -537,26 +537,19 @@ exports.getAllProductList = async (req, res) => {
             const modifiedProductObj = await Promise.all(
               products.map(async (product) => {
                 const obj = product.toJSON(); // <-- Important!
-
-                const categoryName = await getCategoryName(obj.category);
-                const subCategoryName = await getCategoryName(obj.sub_category);
-                const seller = await getUserDetails(obj.seller_id, req);
-                const additionalImage = await getAdditionalImage(obj.id);
-
-                obj.country = JSON.parse(obj.country);
-                obj.category = JSON.parse(obj.category);
-                obj.sub_category = JSON.parse(obj.sub_category);
-                obj.main_image = req.protocol  + '://' + req.get('host') + '/images/' +obj.main_image;
-                obj.category_name = categoryName;
-                obj.subCategory_name = subCategoryName;
-                obj.additional_image = additionalImage;
                 
-                // if(userType == "BUYER") {
-                obj.seller = seller;
-                // }
-
+                obj.product_details = await productDetailsByID(obj.product_id, req);
+                if (userType == __buyerType) {
+                    obj.user_details = await getUserDetails(obj.seller_id, req);
+                    if(obj.user_details) {
+                        obj.user_details.profile_details = await getProfileDetails(obj.seller_id, __sellerType);
+                    }            
+                }else if(userType == __sellerType) {
+                    obj.user_details = await getUserDetails(obj.buyer_id, req);
+                    obj.user_details.profile_details = await getProfileDetails(obj.buyer_id, __buyerType);
+                }
                 return {
-                  ...obj                                  
+                    ...obj                                  
                 };
               })
             );
