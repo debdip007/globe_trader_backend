@@ -166,7 +166,8 @@ exports.login = async (req, res) => {
 
     const user = await User.findOne({
       where: {
-        email: req.body.email
+        email: req.body.email,
+        status: 1
       },
       include: [{
         model: Role,
