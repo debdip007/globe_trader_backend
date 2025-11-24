@@ -534,12 +534,44 @@ exports.getAllProductList = async (req, res) => {
             });            
         }else{
             // let obj = userList.toJSON();
+            const modifiedProductObj = await Promise.all(
+              products.map(async (product) => {
+                const obj = product.toJSON(); // <-- Important!
 
+                const categoryName = await getCategoryName(obj.category);
+                const subCategoryName = await getCategoryName(obj.sub_category);
+                const seller = await getUserDetails(obj.seller_id, req);
+                const additionalImage = await getAdditionalImage(obj.id);
+
+                obj.country = JSON.parse(obj.country);
+                obj.category = JSON.parse(obj.category);
+                obj.sub_category = JSON.parse(obj.sub_category);
+                obj.main_image = req.protocol  + '://' + req.get('host') + '/images/' +obj.main_image;
+                obj.category_name = categoryName;
+                obj.subCategory_name = subCategoryName;
+                obj.additional_image = additionalImage;
+                
+                // if(userType == "BUYER") {
+                obj.seller = seller;
+                // }
+
+                return {
+                  ...obj                                  
+                };
+              })
+            );
+            
             res.status(200).send({
                 success: 1, 
                 message: "Product list found.",
-                details: products     
+                products: modifiedProductObj     
             });
+
+            // res.status(200).send({
+            //     success: 1, 
+            //     message: "Product list found.",
+            //     details: products     
+            // });
         }
 
     } catch (err) { 
