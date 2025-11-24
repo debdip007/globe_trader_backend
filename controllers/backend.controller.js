@@ -538,7 +538,7 @@ exports.getAllProductList = async (req, res) => {
               products.map(async (product) => {
                 const obj = product.toJSON(); // <-- Important!
                 
-                obj.product_details = await productDetailsByID(obj.product_id, req);
+                obj.product_details = await productDetailsByID(obj.id, req);
                 
                 return {
                     ...obj                                  
